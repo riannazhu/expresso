@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: expresso
+    runtime: node
+    buildCommand: node --check server/index.js
+    startCommand: npm start
+    healthCheckPath: /health
+    numInstances: 1

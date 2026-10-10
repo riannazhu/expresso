@@ -1,0 +1,1 @@
+{"name":"expresso","version":"1.0.0","private":true,"type":"module","description":"A competitive multiplayer clay-style café game","scripts":{"start":"node server/index.js","dev":"node --watch server/index.js","test":"node --test test/*.test.js","check":"node --check server/index.js && node --check server/game.js && node --check public/app.js"},"engines":{"node":">=22"}}
