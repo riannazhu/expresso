@@ -12,13 +12,13 @@ Enter your barista name, start a café, or enter a friend's room code. Choose **
 
 ### 2. Get ready
 
-Share the invite. The host picks a mode; in Teams, choose Blue or Peach. Ready players' coasters light up. Once everyone is ready and teams are balanced, the host opens the café.
+Click **Copy code** and share the five-character code. The host picks a mode; in Teams, choose Blue or Peach. Ready players' coasters light up. Once everyone is ready and teams are balanced, the host opens the café.
 
 ![Lobby design reference: ready coasters and game modes](docs/screenshots/lobby.webp)
 
 ### 3. Make drinks
 
-Claim a clipped ticket. Its ingredient pictures show the recipe. Select a cup, press the machine's brew button, then click the milk pitcher and syrup pump you need. Each click adds one portion; each espresso shot takes 2.5 seconds. Add ice for iced recipes, then ring the bell to serve.
+Claim a clipped ticket. Its ingredient pictures show the recipe. Select a cup, press the machine's brew button, then click the milk pitcher and syrup pump you need. Each click adds one portion; each espresso shot takes 2.5 seconds. Open **Drink details & tools** to add ice for iced recipes or clear the cup, then ring the bell to serve.
 
 A new ticket arrives immediately after serving. Customers wait 90 seconds. Accurate, fast drinks earn higher tips; expired tickets earn nothing. The live leaderboard tracks every café. In Teams, **Pass to teammate** keeps the unfinished drink intact.
 

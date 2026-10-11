@@ -72,14 +72,58 @@ const icons = {
   book: '<svg viewBox="0 0 24 24"><path d="M12 5C8 2 4 3 2 4v16c4-2 7-2 10 0 3-2 6-2 10 0V4c-4-2-7-1-10 1Zm0 0v15"/></svg>',
   sound:
     '<svg viewBox="0 0 24 24"><path d="M9 17V5l11-2v12M9 9l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><path d="M9 5V2h6v3h4v17H7V5Zm0 0h6M7 7H3v13h4"/></svg>',
+  crown:
+    '<svg viewBox="0 0 24 24"><path d="m3 7 5 4 4-7 4 7 5-4-3 13H6Z"/></svg>',
   clock:
     '<svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M7 2v5l5 5-5 5v5M17 2v5l-5 5 5 5v5"/></svg>',
 };
 function icon(name) {
   return icons[name] || "";
 }
+// The approved artwork is an atlas. SVG viewBoxes crop physical controls without
+// resizing/redrawing the illustration; dynamic data is always live HTML.
+function art(scene, x, y, width, height, cls = "", path = "") {
+  const id = `cut-${scene}-${x}-${y}`;
+  return `<svg class="reference-art ${cls}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true" focusable="false">${path ? `<defs><clipPath id="${id}"><path d="${path}"/></clipPath></defs>` : ""}<image href="./assets/${scene}.webp" x="${-x}" y="${-y}" width="1672" height="941" ${path ? `clip-path="url(#${id})"` : ""}/></svg>`;
+}
 function mugArt(index = 0) {
-  return `<img class="mug-art mug-${index % 4}" src="./assets/${["mug", "mug-cloud", "mug-flower", "mug-gingham"][index % 4]}.webp" alt="" draggable="false">`;
+  const mugs = [
+    [
+      318,
+      455,
+      241,
+      176,
+      "M6 22Q7 0 94 3Q176-2 184 23L183 35Q223 24 237 62Q247 103 214 126L185 132Q176 169 107 170Q35 172 18 136Z",
+    ],
+    [
+      599,
+      456,
+      245,
+      178,
+      "M8 22Q11 0 100 4Q174 0 182 25L183 37Q225 25 239 65Q251 105 214 131L187 133Q174 175 107 174Q29 170 19 132Z",
+    ],
+    [
+      871,
+      461,
+      245,
+      171,
+      "M7 22Q10 0 97 4Q170 0 185 23L185 38Q223 26 240 63Q250 106 216 129L183 136Q165 171 105 169Q39 169 22 133Z",
+    ],
+    [
+      1147,
+      462,
+      238,
+      169,
+      "M8 22Q8 0 98 3Q176 0 182 24L183 36Q224 24 234 66Q247 101 215 125L183 134Q163 169 106 166Q32 168 20 129Z",
+    ],
+  ];
+  return art(
+    "reference-lobby",
+    ...mugs[index % 4].slice(0, 4),
+    "mug-art",
+    mugs[index % 4][4],
+  );
 }
 function mugIdentity(name) {
   if (state.mode === "teams") return name === "Blue café" ? 0 : 2;
@@ -89,7 +133,7 @@ function mugIdentity(name) {
   );
 }
 function header(time = "") {
-  return `<header class="topbar"><a class="brand" href="./" aria-label="expresso home">express<span class="logo-bean" aria-hidden="true"></span></a><nav class="glass utilities" aria-label="Game controls"><button data-ui="rules"><span class="halo">${icon("book")}</span>How to play</button><button data-ui="sound" aria-pressed="${sound}"><span class="halo">${icon("sound")}</span>Sound${sound ? " on" : ""}</button>${time ? `<span class="timer" role="timer" aria-label="Shift time remaining">${icon("clock")}<b>${time}</b></span>` : ""}</nav></header>`;
+  return `<header class="topbar"><a class="brand" href="./" aria-label="expresso home"><svg class="logo-image" viewBox="15 180 2150 450" preserveAspectRatio="none" aria-hidden="true"><image href="./assets/logo.webp" width="2172" height="724"/></svg></a><nav class="glass utilities" aria-label="Game controls"><button data-ui="rules"><span class="halo">${icon("book")}</span>How to play</button><button data-ui="sound" aria-label="${sound ? "Mute sound" : "Enable sound"}" aria-pressed="${sound}"><span class="halo ${sound ? "" : "muted"}">${icon("sound")}${sound ? "" : '<svg class="mute-slash" viewBox="0 0 24 24"><path d="M3 3L21 21"/></svg>'}</span>Sound</button>${time ? `<span class="timer" role="timer" aria-label="Shift time remaining">${icon("clock")}<b>${time}</b></span>` : ""}</nav></header>`;
 }
 function shell(kind, body, time = "") {
   app.innerHTML = `<div class="scene ${kind}">${header(time)}<main>${body}</main></div>`;
@@ -97,7 +141,7 @@ function shell(kind, body, time = "") {
 function home() {
   shell(
     "landing",
-    `<form id="entry" class="entry-scene"><div class="name-tag"><label for="name">HELLO MY NAME IS</label><input id="name" name="name" maxlength="20" placeholder="Your name" autocomplete="nickname" required><span class="edit-mark" aria-hidden="true">✎</span></div><button class="glazed create" type="submit" name="intent" value="create">☕ Start a café <span>→</span></button><div class="join-ticket"><label for="code">ROOM CODE</label><input id="code" name="code" maxlength="5" placeholder="ABCDE" autocomplete="off" class="code-input"></div><button class="glazed join" type="submit" name="intent" value="join">Join a room <span>→</span></button><div class="practice-cup">${mugArt(0)}</div><button class="glazed cream practice" type="submit" name="intent" value="practice">Practice shift <span>→</span></button></form>`,
+    `<form id="entry" class="entry-scene"><label class="sr-only" for="name">Your barista name</label><input id="name" name="name" maxlength="20" placeholder="Your name" autocomplete="nickname" required><button class="art-button create" type="submit" name="intent" value="create" aria-label="Start a café"></button><label class="sr-only" for="code">Room code</label><input id="code" name="code" maxlength="5" placeholder="ABCDE" autocomplete="off" class="code-input"><button type="button" class="copy-entry" data-ui="copy-entry" aria-label="Copy room code"></button><button class="art-button join" type="submit" name="intent" value="join" aria-label="Join a room"></button><button class="art-button practice" type="submit" name="intent" value="practice" aria-label="Practice shift"></button></form>`,
   );
 }
 function lobby() {
@@ -110,26 +154,40 @@ function lobby() {
       (blue > 0 && blue === state.players.length - blue));
   shell(
     "lobby",
-    `<div class="room-sign"><small>ROOM</small><strong>${esc(state.code)}</strong><button class="glazed cream compact" data-ui="invite">Copy invite ▢</button></div><div class="player-gallery" style="--count:${state.players.length}">${state.players.map((p, i) => `<article class="barista ${p.ready && p.online ? "is-ready" : ""}"><div class="coaster">${mugArt(i)}</div><div class="employee-label"><b>${esc(p.name)}</b><small>${p.host ? "♛ HOST" : p.me ? "YOU" : state.mode === "teams" ? esc(p.team) + " café" : ""}</small></div><span class="readiness"><i></i>${!p.online ? "Offline" : p.ready ? "Ready" : "Not ready"}</span></article>`).join("")}</div><div class="mode-switch"><button class="menu-choice ${state.mode === "ffa" ? "chosen" : ""}" data-mode="ffa" ${!state.host ? "disabled" : ""}><span>☕</span><b>Everyone<br>vs everyone</b><i></i></button><button class="menu-choice ${state.mode === "teams" ? "chosen" : ""}" data-mode="teams" ${!state.host || state.practice ? "disabled" : ""}><span>☕ ☕</span><b>Teams<br><small>serve together</small></b><i></i></button></div><aside class="chalkboard"><b>5-minute<br>shift</b><hr><b>Most tips<br>wins!</b><span>✿</span></aside>${state.mode === "teams" ? `<div class="team-switch glass"><span>Your team</span><button data-team="blue" aria-pressed="${state.me.team === "blue"}">Blue café</button><button data-team="peach" aria-pressed="${state.me.team === "peach"}">Peach café</button></div>` : ""}<button class="glazed ready-button" data-action="ready">${state.me.ready ? "Ready ✓" : "I’m ready"}</button>${state.host ? `<button class="glazed cream open-button" data-action="start" ${canStart ? "" : "disabled"}>Open the café</button>` : '<p class="host-wait glass">Waiting for the host</p>'}<button class="leave-link" data-action="leave">Leave room</button>`,
+    `<div class="room-sign"><small>ROOM</small><strong>${esc(state.code)}</strong><button class="glazed cream compact" data-ui="invite">Copy code ${icon("copy")}</button></div><div class="player-gallery" style="--count:${state.players.length}">${state.players.map((p, i) => `<article class="barista ${p.ready && p.online ? "is-ready" : ""}"><div class="coaster">${mugArt(i)}</div><div class="employee-label"><b>${esc(p.name)}</b><small>${p.host ? icon("crown") + " HOST" : p.me ? "YOU" : state.mode === "teams" ? esc(p.team) + " café" : ""}</small></div><span class="readiness"><i></i>${!p.online ? "Offline" : p.ready ? "Ready" : "Not ready"}</span></article>`).join("")}</div><div class="mode-switch"><button class="menu-choice ${state.mode === "ffa" ? "chosen" : ""}" data-mode="ffa" aria-pressed="${state.mode === "ffa"}" aria-label="Everyone vs everyone" ${!state.host ? "disabled" : ""}>${art("reference-lobby", 30, 727, 245, 190, "", "M39 5Q9 6 7 34L3 139Q1 175 37 182L203 178Q241 175 241 146L238 28Q237 5 206 5Z")}<i></i></button><button class="menu-choice ${state.mode === "teams" ? "chosen" : ""}" data-mode="teams" aria-pressed="${state.mode === "teams"}" aria-label="Teams serve together" ${!state.host || state.practice ? "disabled" : ""}>${art("reference-lobby", 276, 729, 250, 188, "", "M37 4Q8 6 5 31L2 143Q4 177 32 181L208 178Q245 172 245 144L243 26Q239 5 209 4Z")}<i></i></button></div><aside class="sr-only">5-minute shift. Most tips wins!</aside>${state.mode === "teams" ? `<div class="team-switch glass"><span>Your team</span><button data-team="blue" aria-pressed="${state.me.team === "blue"}">Blue café</button><button data-team="peach" aria-pressed="${state.me.team === "peach"}">Peach café</button></div>` : ""}<button class="sprite-button ready-button" data-action="ready" aria-pressed="${state.me.ready}" aria-label="${state.me.ready ? "Not ready" : "I'm ready"}">${art("reference-lobby", 543, 736, 610, 182, "", "M115 5C-22 3-22 168 115 168H490C643 169 643 5 490 5Z")}${state.me.ready ? '<span class="ready-tick" aria-hidden="true">✓</span>' : ""}</button>${state.host ? `<button class="sprite-button open-button" data-action="start" ${canStart ? "" : "disabled"} aria-label="Open the café">${art("reference-lobby", 1180, 776, 435, 126, "", "M74 6C-13 5-13 111 74 111H353C456 112 456 6 353 6Z")}</button>` : '<p class="host-wait glass">Waiting for the host</p>'}<button class="leave-link" data-action="leave">Leave room</button>`,
   );
 }
 function recipeText(r) {
   return `${r.shots} shot${r.shots > 1 ? "s" : ""} · ${r.milk === "none" ? "no milk" : r.milkUnits + " " + r.milk} · ${r.syrup === "none" ? "no syrup" : r.pumps + " " + r.syrup}${r.ice ? " · ice" : ""}`;
 }
+const ingredientIcons = {
+  shot: '<svg viewBox="0 0 40 40"><path fill="#b77531" d="M8 10h21l-3 17H11Z"/><path d="M7 10q11-5 22 0M29 12q13-2 6 10h-8M5 31h29M8 10l3 17q7 6 15 0l3-17"/></svg>',
+  milk: '<svg viewBox="0 0 40 40"><path fill="#c8e4ed" d="M9 11l6-8h12l5 8v24H9Z"/><path d="M9 11l6-8h12l5 8v24H9Zm0 0h23M15 3l5 8v24M24 17h5v8h-5"/></svg>',
+  oat: '<svg viewBox="0 0 40 40"><path fill="#c5d393" d="M9 11l6-8h12l5 8v24H9Z"/><path d="M9 11l6-8h12l5 8v24H9Zm0 0h23M15 3l5 8v24M24 17v13m0-7 5-4m-5 8 5-4"/></svg>',
+  vanilla:
+    '<svg viewBox="0 0 40 40"><path fill="#ffd381" d="M20 17C1-2 0 18 16 20 0 31 16 42 20 25c7 18 24 0 4-4 23-11 0-26-4-4Z"/><circle cx="20" cy="21" r="5" fill="#c78a33"/></svg>',
+  caramel:
+    '<svg viewBox="0 0 40 40"><path fill="#d98437" d="m4 19 11-6 12 6v14l-11 5-12-6Zm14-11 9-5 11 6v13l-10 5-10-6Z"/><path d="m4 19 12 6 11-6M16 25v13m2-30 10 6 10-5M28 14v13"/></svg>',
+  ice: '<svg viewBox="0 0 40 40"><path fill="#9dddf2" d="m5 11 15-7 15 7v20l-15 7-15-7Z"/><path d="m5 11 15 8 15-8M20 19v19M5 11l15-7 15 7v20l-15 7-15-7Z"/></svg>',
+  cold: '<svg viewBox="0 0 40 40"><path fill="#e8c495" d="M11 16h20l-4 22H14Z"/><path d="m11 12 3 26h13l4-26M8 12q14-7 26 0M23 1l-4 25M8 12q14 8 26 0"/></svg>',
+  none: '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14"/><path d="m10 10 20 20"/></svg>',
+};
+function ingredient(name) {
+  return `<i class="recipe-icon">${ingredientIcons[name]}</i>`;
+}
 function recipeRows(r) {
-  return `<span><i class="recipe-icon shot">☕</i>${r.shots} shot${r.shots === 1 ? "" : "s"}</span><span><i class="recipe-icon milk ${r.milk === "oat" ? "oat" : ""}">▥</i>${r.milk === "none" ? "No milk" : r.milkUnits + " " + (r.milk === "whole" ? "milk" : "oat")}</span><span><i class="recipe-icon flavor">${r.syrup === "vanilla" ? "✿" : r.syrup === "caramel" ? "▰" : "—"}</i>${r.syrup === "none" ? "No syrup" : r.pumps + " " + r.syrup}</span><span><i class="recipe-icon cold">${r.ice ? "❄" : "♨"}</i>${r.cup === "hot" ? "Hot cup" : "Cold cup"}${r.cup === "iced" && !r.ice ? " · no ice" : ""}</span>`;
+  return `<span>${ingredient("shot")}${r.shots} shot${r.shots === 1 ? "" : "s"}</span><span>${ingredient(r.milk === "oat" ? "oat" : r.milk === "none" ? "none" : "milk")}${r.milk === "none" ? "No milk" : r.milkUnits + " " + (r.milk === "whole" ? "milk" : "oat")}</span><span>${ingredient(r.syrup === "none" ? "none" : r.syrup)}${r.syrup === "none" ? "No syrup" : r.pumps + " " + r.syrup}</span>${r.ice ? `<span>${ingredient("ice")}Ice</span>` : ""}<span>${ingredient(r.cup === "hot" ? "shot" : "cold")}${r.cup === "hot" ? "Hot" : "Cold"}${r.cup === "iced" && !r.ice ? " · no ice" : ""}</span>`;
 }
 function ticket(o) {
   const patience = Math.max(0, (o.expires - state.now) / 90000);
-  return `<button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}"><span class="brass-clip"></span><small>#${o.index + 1} · ${esc(o.customer)}</small><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim order"}</small></button>`;
+  return `<div class="ticket-wrap"><span class="brass-clip" aria-hidden="true"></span><button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}" aria-label="${esc(o.recipe.name)}, ${o.mine ? "your order" : o.claimedBy ? "claimed by " + esc(o.claimedBy) : "claim order"}"><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim"}</small></button></div>`;
 }
 const outlines = {
   "hot-cup":
-    "M22 6Q48 0 72 5L77 21Q100 14 95 44Q91 61 77 57L73 82Q60 100 35 92L24 73Q2 80 5 43Q8 26 23 28Z",
+    "M23 9Q61-4 95 9L95 65Q88 94 61 96Q35 97 27 72L19 72Q1 71 2 42Q3 19 24 22ZM23 30Q10 25 10 45Q9 64 24 62Z",
   "cold-cup": "M4 4Q50-3 96 4L86 91Q50 102 14 91Z",
   takeaway: "M17 3H83L90 14H97V25H89L80 96H21L11 25H3V14H11Z",
-  "whole-pitcher":
-    "M8 9Q40-3 72 8L76 20Q103 8 96 48Q94 69 77 75L75 93Q39 106 11 94L6 21Z",
+  "whole-pitcher": "M6 9Q40-2 94 9L90 22L93 89Q89 103 50 96Q18 101 10 88Z",
   "oat-pitcher": "M8 8Q44 0 77 9L80 21Q104 17 94 59L82 72L76 94Q42 104 12 94Z",
   "vanilla-pump": "M12 2H93V10H55V29L83 34L96 82V97H6V45L32 29V10H12Z",
   "caramel-pump": "M12 2H93V10H55V29L83 34L96 82V97H6V45L32 29V10H12Z",
@@ -151,17 +209,52 @@ function playing() {
   const time = Math.max(0, Math.ceil((state.ends - state.now) / 1000));
   shell(
     "playing " + mood,
-    `<div class="order-rail">${c.orders.map(ticket).join("")}</div><aside class="glass live-board" aria-label="Live tip leaderboard"><h2>Live tips</h2>${state.leaders.map((l, i) => `<div class="live-row ${l.mine ? "mine" : ""}"><span>${i + 1}</span>${mugArt(mugIdentity(l.name))}<b>${esc(l.name)}</b><strong>${money(l.tips)}</strong></div>`).join("")}</aside><section class="physical-station" aria-label="Drink preparation">${hotspot("Hot cup", "hot-cup " + (d?.cup === "hot" ? "active" : ""), "cup", 'data-cup="hot"', locked || !!d)}${hotspot("Cold cup", "cold-cup " + (d?.cup === "iced" ? "active" : ""), "cup", 'data-cup="iced"', locked || !!d)}${hotspot("To go · cold cup", "takeaway", "cup", 'data-cup="iced"', locked || !!d)}${hotspot(d?.brewingUntil ? "Brewing…" : `Brew shot · ${d?.shots || 0}/2`, "brew-switch " + (d?.brewingUntil ? "brewing" : ""), "brew", "", locked || !d || !!d.brewingUntil || d.shots >= 2)}${hotspot("Whole milk", "whole-pitcher", "milk", 'data-milk="whole"', locked || !d || d.milkUnits >= 2)}${hotspot("Oat milk", "oat-pitcher", "milk", 'data-milk="oat"', locked || !d || d.milkUnits >= 2)}${hotspot("Vanilla pump", "vanilla-pump", "syrup", 'data-syrup="vanilla"', locked || !d || d.pumps >= 2)}${hotspot("Caramel pump", "caramel-pump", "syrup", 'data-syrup="caramel"', locked || !d || d.pumps >= 2)}${hotspot("Serve drink", "serve-bell", "serve", "", locked || !d?.shots || !!d?.brewingUntil)}<div class="cup-labels"><span>Hot</span><span>Cold</span><span>To go</span></div><div class="drink-overlay ${d?.cup === "iced" ? "iced" : ""} ${d?.brewingUntil ? "pouring" : ""}" style="--fill:${d ? Math.min(85, d.shots * 20 + d.milkUnits * 22) : 0}%;--drink:${d?.milkUnits ? "#cda87f" : "#694126"}" aria-hidden="true"><div class="liquid" style="opacity:${d?.shots || d?.milkUnits ? 0.8 : 0}"></div>${d?.ice ? '<span class="ice-bits">▧ ▧</span>' : ""}</div><span class="jar-total">${money(c.tips)}</span></section><div class="prep-dock glass"><b>${o ? esc(o.recipe.name) : "Select a ticket to begin"}</b>${d ? `<span class="drink-details">${esc(recipeText(d))}${d.ice ? "" : " · no ice"}</span>` : "<span>Choose a cup, then use the machine and ingredients.</span>"}<div class="dock-actions"><button data-drink="ice" ${locked || !d || d.cup !== "iced" || d.ice ? "disabled" : ""}>❄ Add ice</button><button data-drink="reset" ${locked || !d ? "disabled" : ""}>Clear cup ↺</button>${state.mode === "teams" ? `<button data-drink="handoff" ${locked ? "disabled" : ""}>Pass to teammate</button>` : ""}</div></div>`,
+    `<div class="order-rail">${c.orders.map(ticket).join("")}</div><aside class="glass live-board" aria-label="Live tip leaderboard"><h2>Live tips</h2>${state.leaders.map((l, i) => `<div class="live-row ${l.mine ? "mine" : ""}"><span>${i + 1}</span>${mugArt(mugIdentity(l.name))}<b>${esc(l.name)}</b><strong>${money(l.tips)}</strong></div>`).join("")}</aside><section class="physical-station" aria-label="Drink preparation">${hotspot("Hot cup", "hot-cup " + (d?.cup === "hot" ? "active" : ""), "cup", 'data-cup="hot"', locked || !!d)}${hotspot("Cold cup", "cold-cup " + (d?.cup === "iced" ? "active" : ""), "cup", 'data-cup="iced"', locked || !!d)}${hotspot("To go · cold cup", "takeaway", "cup", 'data-cup="iced"', locked || !!d)}${hotspot(d?.brewingUntil ? "Brewing…" : `Brew shot · ${d?.shots || 0}/2`, "brew-switch " + (d?.brewingUntil ? "brewing" : ""), "brew", "", locked || !d || !!d.brewingUntil || d.shots >= 2)}${hotspot("Whole milk", "whole-pitcher", "milk", 'data-milk="whole"', locked || !d || d.milkUnits >= 2)}${hotspot("Oat milk", "oat-pitcher", "milk", 'data-milk="oat"', locked || !d || d.milkUnits >= 2)}${hotspot("Vanilla pump", "vanilla-pump", "syrup", 'data-syrup="vanilla"', locked || !d || d.pumps >= 2)}${hotspot("Caramel pump", "caramel-pump", "syrup", 'data-syrup="caramel"', locked || !d || d.pumps >= 2)}${hotspot("Serve drink", "serve-bell", "serve", "", locked || !d?.shots || !!d?.brewingUntil)}<div class="cup-labels">${art("reference-gameplay", 25, 740, 510, 72)}</div><div class="drink-overlay ${d?.cup === "iced" ? "iced" : ""} ${d?.brewingUntil ? "pouring" : ""}" style="--fill:${d ? Math.min(85, d.shots * 20 + d.milkUnits * 22) : 0}%;--drink:${d?.milkUnits ? "#cda87f" : "#694126"}" aria-hidden="true"><div class="liquid" style="opacity:${d?.shots || d?.milkUnits ? 0.8 : 0}"></div>${d?.ice ? '<span class="ice-bits">▧ ▧</span>' : ""}</div><div class="jar-label"><span>Tips</span><strong>${money(c.tips)}</strong></div></section><details class="prep-dock glass"><summary>Drink details &amp; tools</summary><b>${o ? esc(o.recipe.name) : "Select a ticket to begin"}</b>${d ? `<span class="drink-details">${esc(recipeText(d))}${d.ice ? "" : " · no ice"}</span>` : "<span>Choose a cup, then use the machine and ingredients.</span>"}<div class="dock-actions"><button data-drink="ice" ${locked || !d || d.cup !== "iced" || d.ice ? "disabled" : ""}>Add ice</button><button data-drink="reset" ${locked || !d ? "disabled" : ""}>Clear cup ↺</button>${state.mode === "teams" ? `<button data-drink="handoff" ${locked ? "disabled" : ""}>Pass to teammate</button>` : ""}</div></details>`,
     `${Math.floor(time / 60)}:${String(time % 60).padStart(2, "0")}`,
   );
+}
+const podiumCuts = [
+  [
+    260,
+    410,
+    413,
+    326,
+    "M55 35Q60 2 198 5Q330 5 335 39L335 70Q389 64 410 123Q419 178 378 204L339 211 349 226Q387 234 388 266L388 299C365 326 27 338 3 300L3 247Q5 221 73 210Q54 183 55 35Z",
+  ],
+  [
+    673,
+    449,
+    324,
+    267,
+    "M25 40Q24 5 145 5Q259 5 260 42L261 62Q308 53 318 98Q338 151 289 173L267 183 268 201Q309 210 310 231L309 252C285 274 33 277 3 252L3 221Q9 204 41 197Q25 171 25 40Z",
+  ],
+  [
+    995,
+    481,
+    282,
+    239,
+    "M28 34Q29 5 134 5Q237 4 239 36L240 56Q271 59 279 97Q290 139 261 158L242 172 244 188Q268 196 271 211C244 235 22 245 1 218L0 192 38 178Q28 155 28 34Z",
+  ],
+  [
+    1282,
+    500,
+    269,
+    237,
+    "M19 34Q20 5 118 5Q212 3 214 34L217 52Q256 48 265 93Q276 131 245 150L217 162 216 181Q254 190 252 213C232 236 24 241 5 214L5 185 27 176Q18 151 19 34Z",
+  ],
+];
+function podiumArt(index) {
+  const cut = podiumCuts[index % 4];
+  return art("results-blank", ...cut.slice(0, 4), "podium-art", cut[4]);
 }
 function results() {
   shell(
     "results",
-    `<h1 class="wrap-heading">${state.practice ? "Practice complete." : "That’s a wrap."}</h1><div class="podium-gallery" style="--count:${state.leaders.length}">${state.leaders.map((l, i) => `<article class="podium ${state.winners.includes(l.name) ? "winner" : ""}"><div class="podium-cup">${mugArt(mugIdentity(l.name))}<b class="mug-name">${esc(l.name)}</b></div><div class="score-tag"><small>${state.winners.includes(l.name) ? "Winner" : i + 1 + " place"}</small><strong>${money(l.tips)}</strong><span>${l.served} drinks</span></div><div class="podium-base">${state.winners.includes(l.name) ? '<span class="laurel">❧ <i class="logo-bean"></i> ❧</span>' : ""}</div></article>`).join("")}</div>${state.winners.length > 1 && !state.practice ? '<p class="tie-note glass">Equal tips — shared win</p>' : ""}<div class="result-actions"><button class="glazed" data-action="leave">Clock out →</button>${state.host ? '<button class="glazed cream" data-action="rematch">↻ Play again</button>' : '<span class="glass">Waiting for host to play again</span>'}</div>`,
+    `<h1 class="wrap-heading">${state.practice ? "Practice complete." : '<svg class="wrap-image" viewBox="20 170 2128 405" preserveAspectRatio="none" role="img" aria-label="That’s a wrap."><image href="./assets/wrap-title.webp" width="2148" height="732"/></svg>'}</h1><div class="podium-gallery" style="--count:${state.leaders.length}">${state.leaders.map((l, i) => `<article class="podium rank-${Math.min(i, 3)} ${state.winners.includes(l.name) ? "winner" : ""}">${podiumArt(i)}<b class="mug-name">${esc(l.name)}</b><div class="score-tag"><strong>${money(l.tips)}</strong><span>${l.served}<br>drinks</span></div><span class="sr-only">${state.winners.includes(l.name) ? "Winner" : i + 1 + " place"}</span></article>`).join("")}</div>${state.winners.length > 1 && !state.practice ? '<p class="tie-note glass">Equal tips — shared win</p>' : ""}<div class="result-actions"><button class="sprite-button clock-out" data-action="leave" aria-label="Clock out">${art("reference-results", 468, 740, 590, 149, "", "M97 5C-22 6-22 140 97 140H476C610 142 610 5 476 5Z")}</button>${state.host ? `<button class="sprite-button play-again" data-action="rematch" aria-label="Play again">${art("reference-results", 1070, 757, 326, 121, "", "M64 7C-11 6-11 113 64 113H262C340 113 340 7 262 7Z")}</button>` : '<span class="glass">Waiting for host to play again</span>'}</div>`,
   );
 }
 function render() {
+  const toolsOpen = document.querySelector(".prep-dock")?.open;
   const focused = document.activeElement;
   const identity =
     focused?.tagName === "BUTTON"
@@ -179,6 +272,8 @@ function render() {
   else if (state.phase === "lobby") lobby();
   else if (state.phase === "playing") playing();
   else results();
+  if (toolsOpen && state?.phase === "playing")
+    document.querySelector(".prep-dock").open = true;
   if (draft) {
     document.querySelector("#name").value = draft.name;
     document.querySelector("#code").value = draft.code;
@@ -242,14 +337,15 @@ app.addEventListener("click", async (e) => {
     sound = !sound;
     chime();
     render();
-  } else if (el.dataset.ui === "invite") {
-    const link = new URL(location.href);
-    link.searchParams.set("room", state.code);
+  } else if (el.dataset.ui === "invite" || el.dataset.ui === "copy-entry") {
+    const code =
+      state?.code || document.querySelector("#code").value.trim().toUpperCase();
+    if (!code) return toast("Enter a room code first.");
     try {
-      await navigator.clipboard.writeText(link.href);
-      toast("Invite link copied!");
+      await navigator.clipboard.writeText(code);
+      toast("Room code copied!");
     } catch {
-      toast("Room code: " + state.code);
+      toast("Room code: " + code);
     }
   } else if (el.dataset.mode) action({ type: "mode", mode: el.dataset.mode });
   else if (el.dataset.team) action({ type: "team", team: el.dataset.team });

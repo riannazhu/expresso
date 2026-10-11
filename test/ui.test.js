@@ -10,14 +10,22 @@ const source = await readFile(
   "utf8",
 );
 function renderer() {
+  const handlers = {};
+  let copied = "";
   const app = {
     innerHTML: "",
-    addEventListener() {},
+    addEventListener(type, handler) {
+      handlers[type] = handler;
+    },
     querySelectorAll() {
       return [];
     },
   };
-  const fields = { "#name": { value: "" }, "#code": { value: "" } };
+  const fields = {
+    "#name": { value: "" },
+    "#code": { value: "" },
+    "#toast": { textContent: "", classList: { add() {}, remove() {} } },
+  };
   const document = {
     activeElement: null,
     querySelector(selector) {
@@ -26,6 +34,13 @@ function renderer() {
   };
   const context = vm.createContext({
     document,
+    navigator: {
+      clipboard: {
+        async writeText(value) {
+          copied = value;
+        },
+      },
+    },
     URL,
     location: { href: "http://localhost/" },
     sessionStorage: { getItem() {}, removeItem() {}, setItem() {} },
@@ -38,6 +53,8 @@ function renderer() {
     app,
     fields,
     context,
+    handlers,
+    copied: () => copied,
     show(state) {
       context.snapshot = state;
       vm.runInContext("state=snapshot;render()", context);
@@ -90,6 +107,17 @@ test("all scene assets, fonts and mug identities are available from the server",
     const origin = `http://127.0.0.1:${server.address().port}`;
     for (const path of [
       "cafe-day.webp",
+      "landing-blank.webp",
+      "lobby-plate.webp",
+      "results-blank.webp",
+      "reference-landing.webp",
+      "reference-lobby.webp",
+      "reference-gameplay.webp",
+      "reference-results.webp",
+      "logo.webp",
+      "wrap-title.webp",
+      "caprasimo.ttf",
+      "patrick-hand.ttf",
       "workstation.webp",
       "cafe-sunset.webp",
       "mug.webp",
@@ -112,4 +140,22 @@ test("all scene assets, fonts and mug identities are available from the server",
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }
+});
+
+test("copy control copies only the room code and Sound label remains unchanged", async () => {
+  const game = new Game();
+  const host = game.create("Rianna");
+  const ui = renderer();
+  ui.show(host.state);
+  await ui.handlers.click({
+    target: { closest: () => ({ dataset: { ui: "invite" } }) },
+  });
+  assert.equal(ui.copied(), host.code);
+  assert.match(ui.app.innerHTML, /Copy code <svg/);
+  assert.match(ui.app.innerHTML, /class="mute-slash"/);
+  assert.ok(!ui.app.innerHTML.includes("Sound off"));
+  vm.runInContext("sound=true;render()", ui.context);
+  assert.ok(!ui.app.innerHTML.includes("mute-slash"));
+  assert.ok(!ui.app.innerHTML.includes("Sound on"));
+  assert.match(ui.app.innerHTML, />Sound<\/button>/);
 });
