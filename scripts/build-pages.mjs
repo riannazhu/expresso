@@ -1,0 +1,10 @@
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+await mkdir('dist', { recursive: true });
+await cp('public', 'dist', { recursive: true });
+const game = (await readFile('server/game.js', 'utf8')).replace("import { randomBytes, randomInt } from 'node:crypto';", `const randomInt = max => { const limit = Math.floor(4294967296 / max) * max; let value; do { value = crypto.getRandomValues(new Uint32Array(1))[0]; } while (value >= limit); return value % max; };
+const randomBytes = length => ({ toString: () => Array.from(crypto.getRandomValues(new Uint8Array(length)), byte => byte.toString(16).padStart(2, '0')).join('') });`);
+await writeFile('dist/practice-game.js', game);
+await writeFile('dist/pages-mode.js', 'globalThis.EXPRESSO_STATIC = true;\n');
+const html = (await readFile('dist/index.html', 'utf8')).replaceAll('src="/', 'src="./').replaceAll('href="/', 'href="./').replace('<script src="./app.js"', '<script src="./pages-mode.js"></script><script src="./app.js"');
+await writeFile('dist/index.html', html);
+await writeFile('dist/.nojekyll', '');

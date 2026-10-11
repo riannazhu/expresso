@@ -51,3 +51,12 @@ test('HTTP cup selection accepts hot, cold and to-go as distinct machine cups', 
     }
   } finally { await new Promise(resolve=>server.close(resolve)); }
 });
+
+test('practice can exit mid-shift while multiplayer keeps its leave restriction', () => {
+  const g=new Game();const solo=g.create('Solo',true);
+  g.action(solo.code,solo.token,{type:'ready',ready:true});g.action(solo.code,solo.token,{type:'start'});
+  assert.deepEqual(g.action(solo.code,solo.token,{type:'leave'}),{left:true});
+  assert.throws(()=>g.state(solo.code,solo.token),/Room not found/);
+  const {g:multi,a}=setup();
+  assert.throws(()=>multi.action(a.code,a.token,{type:'leave'}),/Finish the shift/);
+});

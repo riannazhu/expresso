@@ -59,7 +59,7 @@ export class Game {
   action(code,id,a) {
     const r=this.room(code), p=this.player(r,id); id=p.id; this.tick(r);
     if(a.type==='leave') {
-      if(r.phase==='playing') fail('Finish the shift before leaving, or close this tab.');
+      if(r.phase==='playing'&&!r.practice) fail('Finish the shift before leaving, or close this tab.');
       r.players=r.players.filter(x=>x.id!==id); if(!r.players.length)this.rooms.delete(r.code); else if(r.host===id)r.host=r.players[0].id;
       this.touch(r); return { left:true };
     }

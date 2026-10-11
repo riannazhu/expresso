@@ -50,7 +50,25 @@ function chime() {
     o.stop(context.currentTime + i * 0.08 + 0.3);
   }
 }
+let practiceGame = null;
+async function practiceApi(path, data) {
+  if (!practiceGame) {
+    const { Game } = await import("./practice-game.js");
+    practiceGame = new Game();
+    try { practiceGame.rooms = new Map(JSON.parse(localStorage.getItem("expresso-practice-rooms") || "[]")); } catch {}
+  }
+  let result;
+  if (path === "create") {
+    if (!data.practice) throw new Error("This site supports solo practice. Multiplayer needs the Node server.");
+    result = practiceGame.create(data.name, true);
+  } else if (path === "join") throw new Error("Room joining needs the multiplayer Node server. Choose Practice shift here.");
+  else if (path === "action") result = practiceGame.action(data.code, session.token, data.action);
+  else result = practiceGame.state(session.code, session.token);
+  localStorage.setItem("expresso-practice-rooms", JSON.stringify([...practiceGame.rooms]));
+  return result;
+}
 async function api(path, data) {
+  if (globalThis.EXPRESSO_STATIC) return practiceApi(path, data);
   const r = await fetch("/api/" + path, {
     method: data ? "POST" : "GET",
     headers: {
@@ -133,7 +151,7 @@ function mugIdentity(name) {
   );
 }
 function header(time = "") {
-  return `<header class="topbar"><a class="brand" href="./" aria-label="expresso home"><svg class="logo-image" viewBox="15 180 2150 450" preserveAspectRatio="none" aria-hidden="true"><image href="./assets/logo.webp" width="2172" height="724"/></svg></a><nav class="glass utilities" aria-label="Game controls"><button data-ui="rules"><span class="halo">${icon("book")}</span>How to play</button><button data-ui="sound" aria-label="${sound ? "Mute sound" : "Enable sound"}" aria-pressed="${sound}"><span class="halo ${sound ? "" : "muted"}">${icon("sound")}${sound ? "" : '<svg class="mute-slash" viewBox="0 0 24 24"><path d="M3 3L21 21"/></svg>'}</span>Sound</button>${time ? `<span class="timer" role="timer" aria-label="Shift time remaining">${icon("clock")}<b>${time}</b></span>` : ""}</nav></header>`;
+  return `<header class="topbar"><a class="brand" href="./" aria-label="expresso home"><svg class="logo-image" viewBox="15 180 2150 450" preserveAspectRatio="none" aria-hidden="true"><image href="./assets/logo.webp" width="2172" height="724"/></svg></a><nav class="glass utilities" aria-label="Game controls"><button data-ui="rules"><span class="halo">${icon("book")}</span>How to play</button><button data-ui="sound" aria-label="${sound ? "Mute sound" : "Enable sound"}" aria-pressed="${sound}"><span class="halo ${sound ? "" : "muted"}">${icon("sound")}${sound ? "" : '<svg class="mute-slash" viewBox="0 0 24 24"><path d="M3 3L21 21"/></svg>'}</span>Sound</button>${state?.practice && state.phase === "playing" ? '<button data-action="leave" class="exit-practice">Exit practice</button>' : ""}${time ? `<span class="timer" role="timer" aria-label="Shift time remaining">${icon("clock")}<b>${time}</b></span>` : ""}</nav></header>`;
 }
 function shell(kind, body, time = "") {
   app.innerHTML = `<div class="scene ${kind}">${header(time)}<main>${body}</main></div>`;
