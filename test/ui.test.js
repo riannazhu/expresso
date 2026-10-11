@@ -188,3 +188,29 @@ test("ticket clicks claim then release an intact drink, and show preparation pro
   await click({ order: order.id });
   assert.equal(game.state(host.code, host.token).cafe.orders[0].mine, true);
 });
+
+
+test("machine tools, centered progress icons and clay drink feedback render together", () => {
+  const ui = renderer();
+  const game = new Game();
+  const host = game.create("Rianna", true);
+  game.action(host.code, host.token, { type: "ready", ready: true });
+  const playing = game.action(host.code, host.token, { type: "start" });
+  const order = playing.cafe.orders[0];
+  game.action(host.code, host.token, { type: "claim", orderId: order.id });
+  game.action(host.code, host.token, { type: "cup", cup: "iced", orderId: order.id });
+  game.action(host.code, host.token, { type: "ice", orderId: order.id });
+  game.action(host.code, host.token, { type: "syrup", syrup: "vanilla", orderId: order.id });
+  ui.context.orderId = order.id;
+  vm.runInContext("selected=orderId", ui.context);
+  const html = ui.show(game.state(host.code, host.token));
+  assert.match(html, /machine-tool ice-switch/);
+  assert.match(html, /machine-tool clear-switch/);
+  assert.match(html, /clay-ice/);
+  assert.match(html, /clay-liquid/);
+  assert.match(html, /1 vanilla pump added/);
+  assert.ok(!html.includes("▧"));
+  const progress = html.slice(html.indexOf('<ol class="drink-progress"'));
+  assert.ok(!progress.includes('class="recipe-icon"'));
+  assert.equal((progress.match(/step-icon"><svg/g) || []).length, 4);
+});

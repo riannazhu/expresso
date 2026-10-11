@@ -911,7 +911,7 @@ button svg {
   overflow: visible;
   filter: drop-shadow(0 0 4px #ffc957) drop-shadow(0 0 8px #fff3aa);
 }
-.object-control:hover:not(:disabled) .object-outline,
+.object-control:hover .object-outline,
 .object-control:focus-visible .object-outline,
 .object-control.active .object-outline {
   opacity: 1;
@@ -1686,3 +1686,29 @@ dialog p {
 .drink-progress .pending { opacity: .4; }
 .drink-progress .complete .step-icon { color: #865024; background: #ffe6b4; }
 .drink-progress .current .step-icon { background: #99551c; box-shadow: 0 0 .8cqw #fff1bc, inset 0 0 .5cqw #ffdb83; border-color: #fff3c8; }
+
+/* Machine controls share the artwork's glazed copper finish. */
+.brew-switch { left: 36.5%; top: 27.9%; }
+.machine-tool { top: 31.05%; width: 4.15%; aspect-ratio: 1; border-radius: 50%; }
+.ice-switch { left: 47.83%; }
+.clear-switch { left: 53.65%; }
+.machine-tool-art { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 35% 23%, #efb35f 0, #c7812f 35%, #ad5c1c 72%, #8c4517 100%); border: .12cqw solid #f3bb62; box-shadow: inset .12cqw .15cqw .18cqw #ffda9d, inset -.12cqw -.15cqw .22cqw #7b371d, 0 .15cqw .24cqw #3e301f; }
+.machine-tool-art svg { width: 60%; height: 60%; fill: #f6dcad; stroke: #7e481f; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 .1cqw .08cqw #7d421f); }
+.machine-tool:hover .machine-tool-art, .machine-tool:focus-visible .machine-tool-art { outline: .12cqw solid #fff2bc; box-shadow: 0 0 .8cqw #ffda86, inset 0 0 .3cqw #fff1b9; }
+.machine-tool:disabled { opacity: 1; }
+.step-icon > svg { display: block; width: 72%; height: 72%; }
+.step-icon svg path[fill] { fill: currentColor; }
+.drink-progress .pending { opacity: .55; }
+.drink-overlay { left: 40.85%; top: 56.45%; width: 10.55%; height: 2.3%; }
+.clay-liquid { position: absolute; inset: 0; overflow: hidden; border-radius: 49% 51% 48% 52%; background: radial-gradient(ellipse at 55% 42%, #76462b 20%, #955b33 70%, #c49664 95%); box-shadow: inset 0 .12cqw .2cqw #3b201f88, inset 0 -.12cqw .12cqw #edc98b88; }
+.clay-liquid.milky { background: radial-gradient(ellipse at 48% 35%, #e2bf8a 10%, #cba375 68%, #a9764d 95%); }
+.crema { position: absolute; inset: 12% 5%; border-radius: 50%; box-shadow: inset 0 .07cqw .1cqw #e1b67b99; background: repeating-radial-gradient(ellipse at 30% 65%, #f1cb9133 0 1px, transparent 2px 5px); opacity: .5; }
+.syrup-swirl { position: absolute; inset: 22% 16%; border: .12cqw solid #a3673088; border-left-color: transparent; border-radius: 50%; transform: rotate(-8deg); box-shadow: 0 .06cqw .12cqw #ffe5b166; }
+.clay-ice { position: absolute; inset: -25% 18% 12%; display: flex; align-items: center; justify-content: center; gap: .35cqw; }
+.clay-ice i { display: block; width: 1.2cqw; height: .85cqw; border-radius: .22cqw .27cqw .2cqw .25cqw; transform: rotate(-12deg); background: linear-gradient(145deg, #f0f7ef 0%, #cae1dc 35%, #a8c8c6 70%, #82a9aa 100%); border: .06cqw solid #e1efea; box-shadow: inset .1cqw .12cqw .12cqw #ffffffbb, inset -.12cqw -.14cqw .13cqw #679b9f88, .1cqw .12cqw .12cqw #583e3266; }
+.clay-ice i::after { content: ""; display: block; margin: 12%; height: 40%; border-radius: .15cqw; border-top: .08cqw solid #ffffffaa; border-left: .07cqw solid #ffffff66; }
+.clay-ice i:nth-child(2) { transform: rotate(15deg) translateY(-.12cqw); }
+.clay-ice i:nth-child(3) { transform: rotate(-5deg) scale(.85); }
+.syrup-confirmation { position: absolute; left: 66%; top: 84%; display: flex; align-items: center; gap: .3cqw; padding: .35cqw .7cqw; border-radius: 999px; background: #fff0d6e8; color: #6e4528; box-shadow: 0 .12cqw .3cqw #7e452244; font-size: .85cqw; }
+.syrup-confirmation .recipe-icon { width: 1.4cqw; height: 1.4cqw; }
+.handoff-tool { position: absolute; left: 5%; bottom: 8%; border-radius: 999px; background: #ffefd7e6; font-size: .9cqw; }
