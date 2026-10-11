@@ -1,1 +1,56 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#2b635d"><meta name="description" content="Brew, serve, and out-tip your friends in Expresso, a multiplayer café game."><title>Expresso · A little friendly café rivalry</title><link rel="stylesheet" href="/style.css"><script src="/app.js" type="module"></script></head><body><div id="app"></div><div id="toast" role="status" aria-live="polite"></div><dialog id="rules"><button class="close" aria-label="Close rules">×</button><span class="eyebrow">THE BARISTA HANDBOOK</span><h2>A little friendly rivalry.</h2><p>Earn the most tips in a five-minute shift. Play solo against friends, or share a café with teammates against another team.</p><ol><li>Claim a customer ticket and choose a hot or cold cup.</li><li>Brew each espresso shot (2.5 seconds), then add the requested milk pours, syrup pumps, and ice. Each ingredient click adds one portion.</li><li>Serve before the customer's 90-second patience runs out. Match all seven recipe details for full accuracy.</li></ol><p><b>Tips:</b> a perfect drink served right away earns $5. The tip shrinks the longer the customer waits, down to $2 at the last second. Each recipe detail you miss lowers it further, so a wrong drink still earns something. Tickets that run out earn nothing.</p><p><b>Teams:</b> equal-sized teams share tickets and tips. Claim locks a ticket; “Pass to teammate” releases it with the drink intact. Inactive claims release after 30 seconds.</p><p>Every café gets the same recipe sequence. Most tips wins; exact ties share the win. The shift moves from day to sunset to night. Practice is solo and has no competitive ranking.</p><button class="primary close-rule">Let's brew</button></dialog></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#2b635d" />
+    <meta
+      name="description"
+      content="Brew, serve, and out-tip your friends in Expresso, a multiplayer café game."
+    />
+    <title>expresso · Café shift</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" type="module"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <dialog id="rules">
+      <button class="close" aria-label="Close rules">×</button
+      ><span class="eyebrow">THE BARISTA HANDBOOK</span>
+      <h2>How to play.</h2>
+      <p>
+        Earn the most tips in a five-minute shift. Play solo against friends, or
+        share a café with teammates against another team.
+      </p>
+      <ol>
+        <li>Claim a customer ticket and choose a hot or cold cup.</li>
+        <li>
+          Brew each espresso shot (2.5 seconds), then add the requested milk
+          pours, syrup pumps, and ice. Each ingredient click adds one portion.
+        </li>
+        <li>
+          Serve before the customer's 90-second patience runs out. Match all
+          seven recipe details for full accuracy.
+        </li>
+      </ol>
+      <p>
+        <b>Tips:</b> a perfect drink served right away earns $5. The tip shrinks
+        the longer the customer waits, down to $2 at the last second. Each
+        recipe detail you miss lowers it further, so a wrong drink still earns
+        something. Tickets that run out earn nothing.
+      </p>
+      <p>
+        <b>Teams:</b> equal-sized teams share tickets and tips. Claim locks a
+        ticket; “Pass to teammate” releases it with the drink intact. Inactive
+        claims release after 30 seconds.
+      </p>
+      <p>
+        Every café gets the same recipe sequence. Most tips wins; exact ties
+        share the win. The shift moves from day to sunset to night. Practice is
+        solo and has no competitive ranking.
+      </p>
+      <button class="primary close-rule">Let's brew</button>
+    </dialog>
+  </body>
+</html>

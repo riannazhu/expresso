@@ -1,65 +1,37 @@
-# Expresso
+# expresso
 
-A multiplayer cafe game.
+A multiplayer café game for 2–8 players. Prepare drinks during a five-minute shift; the biggest tip jar wins. Play everyone vs everyone, or work together in equal-sized teams. Solo practice is also available.
 
-## Local run
+## How to play
 
-Requires Node.js 22 or newer. There are no third-party dependencies and no API keys.
+### 1. Start or join
 
-```sh
-npm start
-# Open http://localhost:3000
-```
+Enter your barista name, start a café, or enter a friend's room code. Choose **Practice shift** to learn on your own.
 
-For another device on the same Wi-Fi, open `http://YOUR_COMPUTER_LAN_IP:3000`. For remote friends, deploy this server to a publicly reachable Node host. A frontend-only host such as GitHub Pages is insufficient.
+![Landing design reference: start, join, or practice](docs/screenshots/landing.webp)
 
-## Play
+### 2. Get ready
 
-1. Enter a name and start a cafe. Share the room code or copied invite link.
-2. Friends join from their own browsers/devices. The host chooses **everyone vs everyone** or **teams**.
-3. Everyone marks ready. Teams must be equal in size; 2–8 players are supported. Two players can play 1v1 in team mode; larger teams collaborate.
-4. The host opens a five-minute shift. Every cafe receives the same recipe sequence and starts with two orders.
-5. Claim an order, choose a hot or cold cup, brew the espresso, add milk, syrup, and ice, then serve.
-6. Each espresso shot takes 2.5 seconds. Each milk/syrup button adds one portion. Tickets specify the exact quantities.
-7. Tips depend on recipe accuracy and remaining patience. The highest individual tip jar or team tip jar wins. Exact ties share the win.
+Share the invite. The host picks a mode; in Teams, choose Blue or Peach. Ready players' coasters light up. Once everyone is ready and teams are balanced, the host opens the café.
 
-### Scoring
+![Lobby design reference: ready coasters and game modes](docs/screenshots/lobby.webp)
 
-Each drink has seven scored details: cup, shot count, milk type, milk quantity, syrup type, syrup quantity, and ice. Accuracy is the fraction matching the ticket.
+### 3. Make drinks
 
-`tip in cents = round(500 × accuracy × (0.4 + 0.6 × remaining patience fraction))`
+Claim a clipped ticket. Its ingredient pictures show the recipe. Select a cup, press the machine's brew button, then click the milk pitcher and syrup pump you need. Each click adds one portion; each espresso shot takes 2.5 seconds. Add ice for iced recipes, then ring the bell to serve.
 
-Patience lasts 90 seconds from ticket creation. Expired orders earn zero and are replaced. Serving replaces the ticket with the next order. Recipes advance in the same deterministic sequence for every cafe; faster cafes can serve more orders. The server owns clocks, ingredients, and scoring. Clients cannot submit tip amounts.
+A new ticket arrives immediately after serving. Customers wait 90 seconds. Accurate, fast drinks earn higher tips; expired tickets earn nothing. The live leaderboard tracks every café. In Teams, **Pass to teammate** keeps the unfinished drink intact.
 
-### Teams and reconnection
+![Gameplay design reference: torn tickets, physical controls, and live tips](docs/screenshots/gameplay.webp)
 
-Teammates share the order rail, drinks, and tips. Claiming an order locks it to one barista to prevent simultaneous changes. **Pass to teammate** releases the claim without erasing the drink. Inactive claims release after 30 seconds. A reload reconnects using a tab-local session token. Opponents cannot edit another cafe.
+### 4. Clock out
 
-The shift moves through afternoon, sunset, and night, each lasting 100 seconds. Solo practice uses the same preparation and scoring mechanics without competitive rankings.
+The highest tips win; equal tips share the win. Review the mug podium, clock out, or let the host reopen the lobby for another shift.
 
-## Deployment
+![Results design reference: mug podium and final tips](docs/screenshots/results.webp)
 
-Run a single Node process with `npm start`. The server listens on `0.0.0.0` and uses the host's `PORT` environment variable (default 3000). `/health` returns a health check. `Dockerfile` and `render.yaml` are included as deployment starting points. Deploying may involve host-specific accounts and billing; this project does not create those automatically.
+The images above are the approved visual design references, not captured browser screenshots. The playable interface recreates the scene with live names, tickets, readiness lights, scores, and controls.
 
-**Current limitation:** rooms are held in server memory and expire after six hours without actions. A server restart clears rooms. Use one always-running instance for the demo; horizontal scaling and restart persistence require shared storage. Polling synchronizes room state about every 700 ms. There is no paid API or external database dependency.
+## Hosting
 
-## Development and validation
-
-```sh
-npm run dev
-npm run check
-npm test
-```
-
-The test suite verifies separate players, matching recipes, isolated cafes, team handoffs and locks, server-owned brewing/scoring, late joins, unauthorized sessions, expiration, ties, rematches, and complete games through real HTTP requests. Browser visual QA and a public deployment must still be completed before contest submission.
-
-## Project layout
-
-- `server/game.js`: room lifecycle, player sessions, recipes, preparation, scoring, teams.
-- `server/index.js`: HTTP API and static serving; same-origin write protection.
-- `public/app.js`: lobby, preparation stations, client synchronization, results, optional sound.
-- `public/style.css`: responsive non-pixel cafe interface and dimensional drink objects.
-- `public/cafe.webp`: original AI-generated clay cafe illustration.
-- `test/game.test.js`: game and HTTP integration tests.
-- `docs/PRD.md`: current rules and acceptance criteria.
-- `docs/reference/`: original CalScape documentation and screenshots for internal reference.
+Public hosting is still pending. Multiplayer needs the included Node server; static GitHub hosting alone cannot run it. Rooms currently live in one server's memory and reset on restart. See [deployment and development](docs/DEVELOPMENT.md) for setup and checks.
