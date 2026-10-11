@@ -182,16 +182,23 @@ function ticket(o) {
   const patience = Math.max(0, (o.expires - state.now) / 90000);
   return `<div class="ticket-wrap"><span class="brass-clip" aria-hidden="true"></span><button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}" aria-label="${esc(o.recipe.name)}, ${o.mine ? "your order" : o.claimedBy ? "claimed by " + esc(o.claimedBy) : "claim order"}"><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim"}</small></button></div>`;
 }
+function drinkProgress(d, order) {
+  const brewed = !!d?.shots && !d?.brewingUntil && d.shots >= (order?.recipe.shots || 1);
+  const finished = brewed && d.milkUnits >= (order?.recipe.milkUnits || 0);
+  const current = !d ? 0 : !brewed ? 1 : !finished ? 2 : 3;
+  const steps = [["Grind", '<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="11" ry="16" transform="rotate(30 20 20)"/><path d="M26 6C28 19 12 22 14 34"/></svg>'], ["Brew", ingredient("shot")], ["Milk", ingredient("milk")], ["Serve", ingredient("shot")]];
+  return `<ol class="drink-progress" aria-label="Drink progress">${steps.map(([label, image], i) => `<li class="${i < current ? "complete" : i === current ? "current" : "pending"}" ${i === current ? 'aria-current="step"' : ""}><span class="step-icon">${image}</span><b>${label}</b></li>`).join("")}</ol>`;
+}
 const outlines = {
   "hot-cup":
-    "M23 9Q61-4 95 9L95 65Q88 94 61 96Q35 97 27 72L19 72Q1 71 2 42Q3 19 24 22ZM23 30Q10 25 10 45Q9 64 24 62Z",
+    "M25 9C40 0 79 0 94 9Q99 14 98 23L94 62C90 85 79 96 60 97C42 97 31 90 26 77C10 81 1 68 2 47C3 28 11 20 25 23ZM25 33C14 29 9 36 9 48Q8 67 24 65Z",
   "cold-cup": "M4 4Q50-3 96 4L86 91Q50 102 14 91Z",
   takeaway: "M17 3H83L90 14H97V25H89L80 96H21L11 25H3V14H11Z",
   "whole-pitcher": "M6 9Q40-2 94 9L90 22L93 89Q89 103 50 96Q18 101 10 88Z",
   "oat-pitcher": "M8 8Q44 0 77 9L80 21Q104 17 94 59L82 72L76 94Q42 104 12 94Z",
-  "vanilla-pump": "M12 2H93V10H55V29L83 34L96 82V97H6V45L32 29V10H12Z",
-  "caramel-pump": "M12 2H93V10H55V29L83 34L96 82V97H6V45L32 29V10H12Z",
-  "serve-bell": "M45 3H58V12Q85 14 92 62L98 74V96H2V77L8 66Q13 19 45 12Z",
+  "vanilla-pump": "M8 4Q45-1 90 4Q94 8 90 12H57V25Q73 25 73 30V36Q89 42 92 52L94 88Q94 97 80 97H20Q6 97 6 88L8 52Q11 42 27 36V30Q27 25 43 25V12H8Q3 8 8 4Z",
+  "caramel-pump": "M8 4Q45-1 90 4Q94 8 90 12H57V25Q73 25 73 30V36Q89 42 92 52L94 88Q94 97 80 97H20Q6 97 6 88L8 52Q11 42 27 36V30Q27 25 43 25V12H8Q3 8 8 4Z",
+  "serve-bell": "M46 3Q50 0 55 3L55 14C77 17 88 33 91 58Q96 62 93 67Q91 72 84 73Q96 79 97 88Q98 96 88 97H12Q2 96 3 88Q4 79 16 73Q5 72 7 65Q8 61 10 58C13 34 25 17 46 14Z",
   "brew-switch": "M50 3A47 47 0 1 1 49.9 3Z",
 };
 function hotspot(label, cls, type, extra = "", disabled = false) {
@@ -209,7 +216,7 @@ function playing() {
   const time = Math.max(0, Math.ceil((state.ends - state.now) / 1000));
   shell(
     "playing " + mood,
-    `<div class="order-rail">${c.orders.map(ticket).join("")}</div><aside class="glass live-board" aria-label="Live tip leaderboard"><h2>Live tips</h2>${state.leaders.map((l, i) => `<div class="live-row ${l.mine ? "mine" : ""}"><span>${i + 1}</span>${mugArt(mugIdentity(l.name))}<b>${esc(l.name)}</b><strong>${money(l.tips)}</strong></div>`).join("")}</aside><section class="physical-station" aria-label="Drink preparation">${hotspot("Hot cup", "hot-cup " + (d?.cup === "hot" ? "active" : ""), "cup", 'data-cup="hot"', locked || !!d)}${hotspot("Cold cup", "cold-cup " + (d?.cup === "iced" ? "active" : ""), "cup", 'data-cup="iced"', locked || !!d)}${hotspot("To go · cold cup", "takeaway", "cup", 'data-cup="iced"', locked || !!d)}${hotspot(d?.brewingUntil ? "Brewing…" : `Brew shot · ${d?.shots || 0}/2`, "brew-switch " + (d?.brewingUntil ? "brewing" : ""), "brew", "", locked || !d || !!d.brewingUntil || d.shots >= 2)}${hotspot("Whole milk", "whole-pitcher", "milk", 'data-milk="whole"', locked || !d || d.milkUnits >= 2)}${hotspot("Oat milk", "oat-pitcher", "milk", 'data-milk="oat"', locked || !d || d.milkUnits >= 2)}${hotspot("Vanilla pump", "vanilla-pump", "syrup", 'data-syrup="vanilla"', locked || !d || d.pumps >= 2)}${hotspot("Caramel pump", "caramel-pump", "syrup", 'data-syrup="caramel"', locked || !d || d.pumps >= 2)}${hotspot("Serve drink", "serve-bell", "serve", "", locked || !d?.shots || !!d?.brewingUntil)}<div class="cup-labels">${art("reference-gameplay", 25, 740, 510, 72)}</div><div class="drink-overlay ${d?.cup === "iced" ? "iced" : ""} ${d?.brewingUntil ? "pouring" : ""}" style="--fill:${d ? Math.min(85, d.shots * 20 + d.milkUnits * 22) : 0}%;--drink:${d?.milkUnits ? "#cda87f" : "#694126"}" aria-hidden="true"><div class="liquid" style="opacity:${d?.shots || d?.milkUnits ? 0.8 : 0}"></div>${d?.ice ? '<span class="ice-bits">▧ ▧</span>' : ""}</div><div class="jar-label"><span>Tips</span><strong>${money(c.tips)}</strong></div></section><details class="prep-dock glass"><summary>Drink details &amp; tools</summary><b>${o ? esc(o.recipe.name) : "Select a ticket to begin"}</b>${d ? `<span class="drink-details">${esc(recipeText(d))}${d.ice ? "" : " · no ice"}</span>` : "<span>Choose a cup, then use the machine and ingredients.</span>"}<div class="dock-actions"><button data-drink="ice" ${locked || !d || d.cup !== "iced" || d.ice ? "disabled" : ""}>Add ice</button><button data-drink="reset" ${locked || !d ? "disabled" : ""}>Clear cup ↺</button>${state.mode === "teams" ? `<button data-drink="handoff" ${locked ? "disabled" : ""}>Pass to teammate</button>` : ""}</div></details>`,
+    `<div class="order-rail">${c.orders.map(ticket).join("")}</div><aside class="glass live-board" aria-label="Live tip leaderboard"><h2>Live tips</h2>${state.leaders.map((l, i) => `<div class="live-row ${l.mine ? "mine" : ""}"><span>${i + 1}</span>${mugArt(mugIdentity(l.name))}<b>${esc(l.name)}</b><strong>${money(l.tips)}</strong></div>`).join("")}</aside><section class="physical-station" aria-label="Drink preparation">${hotspot("Hot cup", "hot-cup " + (d?.cup === "hot" ? "active" : ""), "cup", 'data-cup="hot"', locked || !!d)}${hotspot("Cold cup", "cold-cup " + (d?.cup === "iced" ? "active" : ""), "cup", 'data-cup="iced"', locked || !!d)}${hotspot("To go · cold cup", "takeaway", "cup", 'data-cup="iced"', locked || !!d)}${hotspot(d?.brewingUntil ? "Brewing…" : `Brew shot · ${d?.shots || 0}/2`, "brew-switch " + (d?.brewingUntil ? "brewing" : ""), "brew", "", locked || !d || !!d.brewingUntil || d.shots >= 2)}${hotspot("Whole milk", "whole-pitcher", "milk", 'data-milk="whole"', locked || !d || d.milkUnits >= 2)}${hotspot("Oat milk", "oat-pitcher", "milk", 'data-milk="oat"', locked || !d || d.milkUnits >= 2)}${hotspot("Vanilla pump", "vanilla-pump", "syrup", 'data-syrup="vanilla"', locked || !d || d.pumps >= 2)}${hotspot("Caramel pump", "caramel-pump", "syrup", 'data-syrup="caramel"', locked || !d || d.pumps >= 2)}${hotspot("Serve drink", "serve-bell", "serve", "", locked || !d?.shots || !!d?.brewingUntil)}<div class="cup-labels">${art("reference-gameplay", 25, 740, 510, 72)}</div><div class="drink-overlay ${d?.cup === "iced" ? "iced" : ""} ${d?.brewingUntil ? "pouring" : ""}" style="--fill:${d ? Math.min(85, d.shots * 20 + d.milkUnits * 22) : 0}%;--drink:${d?.milkUnits ? "#cda87f" : "#694126"}" aria-hidden="true"><div class="liquid" style="opacity:${d?.shots || d?.milkUnits ? 0.8 : 0}"></div>${d?.ice ? '<span class="ice-bits">▧ ▧</span>' : ""}</div><div class="jar-label"><span>Tips</span><strong>${money(c.tips)}</strong></div></section><div class="cup-tools"><button data-drink="ice" ${locked || !d || d.cup !== "iced" || d.ice ? "disabled" : ""}>${ingredient("ice")} Add ice</button><button data-drink="reset" ${locked || !d ? "disabled" : ""}>Clear cup ↺</button>${state.mode === "teams" ? `<button data-drink="handoff" ${locked ? "disabled" : ""}>Pass to teammate</button>` : ""}</div>${drinkProgress(d, o)}`,
     `${Math.floor(time / 60)}:${String(time % 60).padStart(2, "0")}`,
   );
 }
@@ -254,7 +261,6 @@ function results() {
   );
 }
 function render() {
-  const toolsOpen = document.querySelector(".prep-dock")?.open;
   const focused = document.activeElement;
   const identity =
     focused?.tagName === "BUTTON"
@@ -272,8 +278,6 @@ function render() {
   else if (state.phase === "lobby") lobby();
   else if (state.phase === "playing") playing();
   else results();
-  if (toolsOpen && state?.phase === "playing")
-    document.querySelector(".prep-dock").open = true;
   if (draft) {
     document.querySelector("#name").value = draft.name;
     document.querySelector("#code").value = draft.code;
@@ -329,7 +333,14 @@ app.addEventListener("submit", async (e) => {
     busy = false;
   }
 });
+// Polling must not replace a button between pointerdown and click.
+let pointerPressed = false;
+app.addEventListener("pointerdown", () => { pointerPressed = true; });
+app.addEventListener("pointerup", () => { pointerPressed = false; });
+app.addEventListener("pointercancel", () => { pointerPressed = false; });
+document.addEventListener?.("pointerup", () => { pointerPressed = false; });
 app.addEventListener("click", async (e) => {
+  pointerPressed = false;
   const el = e.target.closest("button");
   if (!el) return;
   if (el.dataset.ui === "rules") document.querySelector("#rules").showModal();
@@ -357,7 +368,10 @@ app.addEventListener("click", async (e) => {
   else if (el.dataset.order) {
     selected = el.dataset.order;
     const o = state.cafe.orders.find((o) => o.id === selected);
-    if (!o.claimedBy || o.mine) {
+    if (o.mine) {
+      selected = null;
+      await action({ type: "handoff", orderId: o.id });
+    } else if (!o.claimedBy) {
       station = o.drink ? "finish" : "brew";
       await action({ type: "claim", orderId: selected });
     } else render();
@@ -408,7 +422,7 @@ setInterval(async () => {
     errors = 0;
     if (!state || next.version >= state.version) {
       state = next;
-      render();
+      if (!pointerPressed) render();
     }
   } catch (e) {
     errors++;

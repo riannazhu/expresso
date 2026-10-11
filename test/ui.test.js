@@ -159,3 +159,32 @@ test("copy control copies only the room code and Sound label remains unchanged",
   assert.ok(!ui.app.innerHTML.includes("Sound on"));
   assert.match(ui.app.innerHTML, />Sound<\/button>/);
 });
+
+test("ticket clicks claim then release an intact drink, and show preparation progress", async () => {
+  const game = new Game();
+  const host = game.create("Rianna", true);
+  game.action(host.code, host.token, { type: "ready", ready: true });
+  const playing = game.action(host.code, host.token, { type: "start" });
+  const order = playing.cafe.orders[0];
+  const ui = renderer();
+  ui.context.hostSession = host;
+  vm.runInContext("session=hostSession", ui.context);
+  ui.context.fetch = async (url, options) => {
+    const { action } = JSON.parse(options.body);
+    return { ok: true, json: async () => game.action(host.code, host.token, action) };
+  };
+  ui.show(playing);
+  const click = dataset => ui.handlers.click({ target: { closest: () => ({ dataset }) } });
+  await click({ order: order.id });
+  assert.equal(game.state(host.code, host.token).cafe.orders[0].mine, true);
+  await click({ drink: "cup", cup: "hot" });
+  assert.match(ui.app.innerHTML, /drink-progress/);
+  assert.match(ui.app.innerHTML, /aria-current="step"/);
+  assert.ok(!ui.app.innerHTML.includes('class="prep-dock'));
+  await click({ order: order.id });
+  const released = game.state(host.code, host.token).cafe.orders[0];
+  assert.equal(released.claimedBy, null);
+  assert.equal(released.drink.cup, "hot");
+  await click({ order: order.id });
+  assert.equal(game.state(host.code, host.token).cafe.orders[0].mine, true);
+});

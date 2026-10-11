@@ -712,37 +712,11 @@ button svg {
   display: block;
   width: 100%;
   min-height: 28.2cqh;
-  max-height: 37cqh;
+  max-height: none;
   background: linear-gradient(100deg, #ffeccd, #f4d5a6 78%, #eccc9b);
-  border-radius: 0.6cqw 0.6cqw 0 0;
+  border-radius: 0.6cqw;
   text-align: left;
   padding: 3.8cqh 1.05cqw 1.7cqh;
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% 95%,
-    95% 96%,
-    91% 95%,
-    87% 97%,
-    84% 96%,
-    79% 98%,
-    75% 97%,
-    69% 98%,
-    64% 97%,
-    60% 99%,
-    55% 98%,
-    49% 99%,
-    44% 97%,
-    38% 99%,
-    34% 98%,
-    28% 100%,
-    23% 97%,
-    17% 98%,
-    13% 96%,
-    8% 97%,
-    4% 95%,
-    0 96%
-  );
   box-shadow:
     inset 1px 1px 1px #fff8dc,
     inset -1px 0 1px #cb996966;
@@ -1692,3 +1666,23 @@ dialog p {
 .play-again {
   width: 35.13%;
 }
+
+/* Match the physical silhouettes without letting decoration intercept clicks. */
+.object-outline { pointer-events: none; }
+.brew-switch { top: 28.4%; left: 36.3%; width: 7.8%; height: auto; aspect-ratio: 1; }
+.vanilla-pump { top: 38.5%; left: 76.1%; width: 7.8%; height: 30%; z-index: 2; }
+.caramel-pump { top: 39.5%; left: 83.7%; width: 7.5%; height: 29%; z-index: 2; }
+.whole-pitcher, .oat-pitcher { z-index: 3; }
+.serve-bell { left: 82.3%; top: 75.4%; width: 13%; height: 17.3%; }
+.cup-tools { position: absolute; left: 8%; top: 86%; display: flex; gap: .5cqw; z-index: 5; }
+.cup-tools button { display: flex; align-items: center; gap: .3cqw; border-radius: 999px; padding: .4cqw .7cqw; background: #ffefd7e6; font-size: .9cqw; }
+.cup-tools svg { width: 1.4cqw; height: 1.4cqw; stroke: #704922; fill: none; }
+.drink-progress { position: absolute; left: 34%; bottom: 2%; width: 42%; display: flex; justify-content: space-between; list-style: none; margin: 0; padding: 0; pointer-events: none; }
+.drink-progress li { position: relative; display: grid; justify-items: center; gap: .35cqw; width: 20%; color: #ffe6b4; font-size: 1.1cqw; }
+.step-icon { display: grid; place-items: center; width: 3.8cqw; aspect-ratio: 1; border-radius: 50%; border: .15cqw solid #ffe6b4; background: #a9693699; }
+.step-icon svg { width: 65%; height: 65%; fill: none; stroke: currentColor; stroke-width: 2; }
+.drink-progress li::after { content: ""; position: absolute; left: 87%; top: 1.85cqw; width: 65%; height: .16cqw; background: #ffe6b4; border-radius: 999px; }
+.drink-progress li:last-child::after { display: none; }
+.drink-progress .pending { opacity: .4; }
+.drink-progress .complete .step-icon { color: #865024; background: #ffe6b4; }
+.drink-progress .current .step-icon { background: #99551c; box-shadow: 0 0 .8cqw #fff1bc, inset 0 0 .5cqw #ffdb83; border-color: #fff3c8; }
