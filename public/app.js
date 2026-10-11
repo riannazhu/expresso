@@ -206,10 +206,10 @@ function centerCup(d) {
   const cuts = {
     hot: [667, 526, 276, 180, "M8 14Q90-8 194 12L202 48Q233 17 262 39Q290 72 264 118Q250 140 203 145Q181 181 100 177Q14 180 6 125Z"],
     iced: [230, 594, 129, 158, "M4 10Q62-7 126 10L117 142Q68 165 14 145Z"],
-    togo: [365, 562, 145, 192, "M18 17Q70-3 131 18L132 35H142L140 54H130L118 181Q70 200 29 183L17 56H5V39H14Z"],
+    togo: [382, 611, 114, 143, "M3 5Q56-2 111 5L101 132Q57 151 12 134Z"],
   };
   const [x,y,w,h,path] = cuts[d.cup] || cuts.hot;
-  return patch + `<div class="center-cup-art cup-${d.cup}">${art("workstation", x,y,w,h,"",path)}</div>`;
+  return patch + `<div class="center-cup-art cup-${d.cup}">${art("workstation", x,y,w,h,"",path)}${d.cup === "togo" ? '<span class="togo-open-rim" aria-hidden="true"></span>' : ""}</div>`;
 }
 function drinkSurface(d) {
   if (!d || (!d.shots && !d.milkUnits && !d.ice && !d.brewingUntil)) return "";

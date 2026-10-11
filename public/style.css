@@ -1715,4 +1715,6 @@ dialog p {
 .center-cup-art.cup-iced { left: 41.8%; top: 56.5%; width: 9%; height: 18.5%; }
 .center-cup-art.cup-togo { left: 41.5%; top: 54.5%; width: 10%; height: 20.5%; }
 .drink-overlay.cup-iced { left: 42.2%; top: 57.25%; width: 8%; height: 1.8%; }
-.drink-overlay.cup-togo { display: none; }
+.drink-overlay.cup-togo { display: block; left: 42.07%; top: 58.15%; width: 8.45%; height: 1.8%; }
+.center-cup-art.cup-togo { left: 41.7%; top: 57.7%; width: 9.2%; height: 17.3%; }
+.togo-open-rim { position: absolute; left: 2%; top: -1%; width: 96%; height: 15%; border-radius: 50%; background: radial-gradient(ellipse at center, #805538 45%, #b18b66 75%, #efcfa2 82%, #f8ddaf 91%, #c59b6d 100%); box-shadow: 0 .08cqw .1cqw #80543155, inset 0 .08cqw .12cqw #fff0c9; }

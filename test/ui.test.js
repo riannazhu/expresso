@@ -239,6 +239,7 @@ test("cup labels and progress reflect all three cup types and lighting only warn
     assert.match(html, />Cup<\/b>/);
     assert.ok(!html.includes(">Grind<"));
     assert.ok(html.includes(cup === "hot" ? "Hot" : cup === "iced" ? "Cold" : "To go"));
+    if (cup === "togo") assert.match(html, /togo-open-rim/);
   }
   now += 289999;
   assert.ok(!ui.show(game.state(host.code, host.token)).includes("playing urgent"));
