@@ -47,22 +47,11 @@ Open http://localhost:3000. After backend updates, stop the old process with Ctr
 
 Choose **Practice shift** on the landing page, ready up, and open the café. **Exit practice** in the top bar returns to the landing page immediately, even during a shift.
 
-## GitHub Pages
+## Live game
 
-The Pages build runs solo practice entirely in the browser, including brewing, recipes, timers and scoring. Multiplayer room hosting and joining require the Node server.
+Play multiplayer or practice at https://expresso-c4n9.onrender.com/.
 
-1. In this repository, open **Settings → Pages** and choose **GitHub Actions** as the source.
-2. In **Actions**, run **Deploy practice to GitHub Pages**, or push to `main`.
-3. After the workflow succeeds, open https://riannazhu.github.io/expresso/ and choose **Practice shift**.
-
-The workflow tests the game, builds `dist/`, and publishes it. Browser practice saves its room state locally so refreshes can resume a shift.
-
-To inspect the static build locally:
-
-```sh
-node scripts/build-pages.mjs
-python3 -m http.server 8080 --directory dist
-```
+The game is hosted on Render. Pushes to `main` automatically deploy when Render auto-deploy is enabled. GitHub Pages deployment has been removed.
 
 ## Multiplayer hosting
 
