@@ -92,14 +92,7 @@ button svg {
 .scene.playing {
   background-image: url("./assets/workstation.webp");
 }
-.scene.sunset {
-  background-color: #ffc5a1;
-  background-blend-mode: multiply;
-}
-.scene.night {
-  background-color: #a3a0c6;
-  background-blend-mode: multiply;
-}
+.scene.playing.urgent { background-color: #ffc0b5; background-blend-mode: multiply; }
 .scene main {
   position: absolute;
   inset: 0;
@@ -1712,3 +1705,14 @@ dialog p {
 .syrup-confirmation { position: absolute; left: 66%; top: 84%; display: flex; align-items: center; gap: .3cqw; padding: .35cqw .7cqw; border-radius: 999px; background: #fff0d6e8; color: #6e4528; box-shadow: 0 .12cqw .3cqw #7e452244; font-size: .85cqw; }
 .syrup-confirmation .recipe-icon { width: 1.4cqw; height: 1.4cqw; }
 .handoff-tool { position: absolute; left: 5%; bottom: 8%; border-radius: 999px; background: #ffefd7e6; font-size: .9cqw; }
+
+.ticket-cup { display: flex; align-items: center; gap: .35cqw; color: #865628; font-weight: 800; font-size: 1cqw; margin-bottom: .4cqw; }
+.ticket-cup svg { width: 1.7cqw; height: 1.7cqw; fill: none; stroke: currentColor; stroke-width: 2; }
+
+.empty-cup-patch { position: absolute; left: 39.1746%; top: 55.2604%; width: 17.6435%; height: 20.1913%; pointer-events: none; }
+.center-cup-art { position: absolute; pointer-events: none; }
+.center-cup-art.cup-hot { left: 39.8923%; top: 55.898%; width: 16.5072%; height: 19.1286%; }
+.center-cup-art.cup-iced { left: 41.8%; top: 56.5%; width: 9%; height: 18.5%; }
+.center-cup-art.cup-togo { left: 41.5%; top: 54.5%; width: 10%; height: 20.5%; }
+.drink-overlay.cup-iced { left: 42.2%; top: 57.25%; width: 8%; height: 1.8%; }
+.drink-overlay.cup-togo { display: none; }

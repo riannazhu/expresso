@@ -10,3 +10,20 @@ test('reject invalid sessions, premature brewing, duplicate serves and late join
 test('expired orders score zero; exact ties share victory; rematch resets scores',()=>{const {g,a,b,advance}=setup();advance(91000);const s=g.state(a.code,a.token);assert.equal(s.cafe.missed,2);assert.equal(s.cafe.tips,0);advance(300000);assert.deepEqual(g.state(a.code,a.token).winners.sort(),['Maya','Rianna']);assert.throws(()=>g.action(b.code,b.token,{type:'rematch'}),/host/);g.action(a.code,a.token,{type:'rematch'});assert.equal(g.state(a.code,a.token).phase,'lobby');assert(g.state(a.code,a.token).players.every(p=>!p.ready));});
 test('balanced teams and readiness required; host transfers on lobby departure',()=>{const g=new Game();const a=g.create('A'),b=g.join(a.code,'B'),c=g.join(a.code,'C');g.action(a.code,a.token,{type:'mode',mode:'teams'});assert.throws(()=>g.action(a.code,a.token,{type:'start'}),/ready/);for(const p of [a,b,c])g.action(a.code,p.token,{type:'ready',ready:true});assert.throws(()=>g.action(a.code,a.token,{type:'start'}),/same number/);g.action(a.code,a.token,{type:'leave'});assert.equal(g.state(b.code,b.token).host,true);});
 test('real HTTP clients can host, join, play and finish through production endpoints',async()=>{let now=100000;const g=new Game({now:()=>now});const server=createServer(g);await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));try{const base='http://127.0.0.1:'+server.address().port;const post=async(path,data,token)=>{const r=await fetch(base+'/api/'+path,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(data)});return {status:r.status,body:await r.json()};};const a=(await post('create',{name:'Host'})).body,b=(await post('join',{name:'Guest',code:a.code})).body;for(const p of [a,b])assert.equal((await post('action',{code:a.code,action:{type:'ready',ready:true}},p.token)).status,200);const s=(await post('action',{code:a.code,action:{type:'start'}},a.token)).body;const order=s.cafe.orders[0];for(const action of [{type:'claim'},{type:'cup',cup:order.recipe.cup},{type:'brew'}])assert.equal((await post('action',{code:a.code,action:{...action,orderId:order.id}},a.token)).status,200);now+=2500;assert.equal((await post('action',{code:a.code,action:{type:'serve',orderId:order.id}},a.token)).status,200);now+=300000;const end=await fetch(base+'/api/state?code='+a.code,{headers:{Authorization:'Bearer '+b.token}});assert.equal((await end.json()).phase,'results');const html=await fetch(base+'/');assert.equal(html.status,200);assert((await html.text()).includes('Expresso'));assert.equal((await post('action',{code:a.code,action:{type:'start'}},'invalid')).status,400);}finally{await new Promise(resolve=>server.close(resolve));}});
+
+
+test('orders evenly rotate three distinct cups and score to-go drinks correctly', () => {
+  let now=1000;
+  const g=new Game({now:()=>now});
+  const host=g.create('A',true);
+  g.action(host.code,host.token,{type:'ready',ready:true});
+  g.action(host.code,host.token,{type:'start'});
+  const room=g.room(host.code), cafe=room.cafes[0];
+  const counts={hot:0,iced:0,togo:0};
+  for(let i=0;i<30;i++)counts[g.order(room,cafe).recipe.cup]++;
+  assert.deepEqual(counts,{hot:10,iced:10,togo:10});
+  cafe.orders=[g.order(room,cafe)];
+  while(cafe.orders[0].recipe.cup!=='togo')cafe.orders=[g.order(room,cafe)];
+  const result=makeDrink(g,host,amount=>now+=amount);
+  assert.equal(result.cafe.history[0].accuracy,100);
+});

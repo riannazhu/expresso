@@ -119,6 +119,7 @@ test("all scene assets, fonts and mug identities are available from the server",
       "caprasimo.ttf",
       "patrick-hand.ttf",
       "workstation.webp",
+      "workstation-empty.webp",
       "cafe-sunset.webp",
       "mug.webp",
       "mug-cloud.webp",
@@ -208,9 +209,37 @@ test("machine tools, centered progress icons and clay drink feedback render toge
   assert.match(html, /machine-tool clear-switch/);
   assert.match(html, /clay-ice/);
   assert.match(html, /clay-liquid/);
-  assert.match(html, /1 vanilla pump added/);
+  assert.match(html, /Vanilla pump · 1\/2/);
+  assert.ok(!html.includes("syrup-confirmation"));
   assert.ok(!html.includes("▧"));
   const progress = html.slice(html.indexOf('<ol class="drink-progress"'));
   assert.ok(!progress.includes('class="recipe-icon"'));
   assert.equal((progress.match(/step-icon"><svg/g) || []).length, 4);
+});
+
+
+test("cup labels and progress reflect all three cup types and lighting only warns at ten seconds", () => {
+  let now = 1000;
+  const game = new Game({ now: () => now });
+  const host = game.create("Rianna", true);
+  game.action(host.code, host.token, { type: "ready", ready: true });
+  game.action(host.code, host.token, { type: "start" });
+  const ui = renderer();
+  for (const cup of ["hot", "iced", "togo"]) {
+    const snapshot = game.state(host.code, host.token);
+    const order = snapshot.cafe.orders[0];
+    order.recipe = { ...order.recipe, cup };
+    order.drink = { cup, shots: 0, milkUnits: 0, pumps: 0 };
+    ui.context.orderId = order.id;
+    vm.runInContext("selected=orderId", ui.context);
+    const html = ui.show(snapshot);
+    assert.match(html, /ticket-cup/);
+    assert.match(html, />Cup<\/b>/);
+    assert.ok(!html.includes(">Grind<"));
+    assert.ok(html.includes(cup === "hot" ? "Hot" : cup === "iced" ? "Cold" : "To go"));
+  }
+  now += 289999;
+  assert.ok(!ui.show(game.state(host.code, host.token)).includes("playing urgent"));
+  now += 1;
+  assert.match(ui.show(game.state(host.code, host.token)), /playing urgent/);
 });

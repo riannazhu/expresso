@@ -33,7 +33,9 @@ export class Game {
   touch(r) { r.updated = this.now(); r.version++; }
   cafe(r, p) { return r.cafes.find(c=>c.id===(r.mode==='teams'?p.team:p.id)); }
   order(r,c) {
-    const index=c.next++, recipe=RECIPES[(r.seed + index * 5) % RECIPES.length];
+    const index=c.next++, cup=['hot','iced','togo'][(r.seed+index)%3];
+    const choices=RECIPES.filter(recipe=>recipe.cup===(cup==='iced'?'iced':'hot'));
+    const recipe={...choices[(r.seed+Math.floor(index/3))%choices.length],cup};
     return { id: `${c.id}:${index}`, index, customer: CUSTOMERS[(r.seed+index)%CUSTOMERS.length], recipe, created:this.now(), expires:this.now()+90000, drink:null, owner:null, lease:0 };
   }
   tick(r) {
@@ -79,7 +81,7 @@ export class Game {
       else {
         if(o.owner!==id)fail('Claim this order before preparing it.');o.lease=this.now();
         if(a.type==='handoff') { o.owner=null; }
-        else if(a.type==='cup') { if(!['hot','iced'].includes(a.cup))fail('Choose a cup.'); if(o.drink)fail('Clear the cup before choosing another.');o.drink={cup:a.cup,shots:0,milk:'none',milkUnits:0,syrup:'none',pumps:0,ice:false,brewingUntil:0}; }
+        else if(a.type==='cup') { if(!['hot','iced','togo'].includes(a.cup))fail('Choose a cup.'); if(o.drink)fail('Clear the cup before choosing another.');o.drink={cup:a.cup,shots:0,milk:'none',milkUnits:0,syrup:'none',pumps:0,ice:false,brewingUntil:0}; }
         else if(a.type==='reset') { o.drink=null; }
         else {
           const d=o.drink;if(!d)fail('Choose a cup first.');

@@ -175,27 +175,44 @@ const ingredientIcons = {
 function ingredient(name) {
   return `<i class="recipe-icon">${ingredientIcons[name]}</i>`;
 }
+const cupLabel = cup => cup === "hot" ? "Hot" : cup === "togo" ? "To go" : "Cold";
+function cupGraphic(cup) {
+  if (cup === "iced") return '<svg viewBox="0 0 40 40"><path d="M9 6Q20 2 31 6L28 34Q20 39 12 34ZM9 6Q20 11 31 6M14 11L16 31M20 12V33M26 11L24 31"/></svg>';
+  if (cup === "togo") return '<svg viewBox="0 0 40 40"><path d="M10 8L12 3H28L30 8M7 8H33V13H7ZM10 13L13 36H27L30 13M12 23H28"/></svg>';
+  return ingredientIcons.shot;
+}
 function recipeRows(r) {
-  return `<span>${ingredient("shot")}${r.shots} shot${r.shots === 1 ? "" : "s"}</span><span>${ingredient(r.milk === "oat" ? "oat" : r.milk === "none" ? "none" : "milk")}${r.milk === "none" ? "No milk" : r.milkUnits + " " + (r.milk === "whole" ? "milk" : "oat")}</span><span>${ingredient(r.syrup === "none" ? "none" : r.syrup)}${r.syrup === "none" ? "No syrup" : r.pumps + " " + r.syrup}</span>${r.ice ? `<span>${ingredient("ice")}Ice</span>` : ""}<span>${ingredient(r.cup === "hot" ? "shot" : "cold")}${r.cup === "hot" ? "Hot" : "Cold"}${r.cup === "iced" && !r.ice ? " · no ice" : ""}</span>`;
+  return `<span>${ingredient("shot")}${r.shots} shot${r.shots === 1 ? "" : "s"}</span><span>${ingredient(r.milk === "oat" ? "oat" : r.milk === "none" ? "none" : "milk")}${r.milk === "none" ? "No milk" : r.milkUnits + " " + (r.milk === "whole" ? "milk" : "oat")}</span><span>${ingredient(r.syrup === "none" ? "none" : r.syrup)}${r.syrup === "none" ? "No syrup" : r.pumps + " " + r.syrup}</span>${r.ice ? `<span>${ingredient("ice")}Ice</span>` : ""}<span>${ingredient(r.cup === "iced" ? "cold" : "shot")}${r.cup === "iced" ? "Cold" : "Hot"}${r.cup === "iced" && !r.ice ? " · no ice" : ""}</span>`;
 }
 function ticket(o) {
   const patience = Math.max(0, (o.expires - state.now) / 90000);
-  return `<div class="ticket-wrap"><span class="brass-clip" aria-hidden="true"></span><button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}" aria-label="${esc(o.recipe.name)}, ${o.mine ? "your order" : o.claimedBy ? "claimed by " + esc(o.claimedBy) : "claim order"}"><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim"}</small></button></div>`;
+  return `<div class="ticket-wrap"><span class="brass-clip" aria-hidden="true"></span><button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}" aria-label="${esc(o.recipe.name)}, ${o.mine ? "your order" : o.claimedBy ? "claimed by " + esc(o.claimedBy) : "claim order"}"><div class="ticket-cup">${cupGraphic(o.recipe.cup)}${cupLabel(o.recipe.cup)}</div><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim"}</small></button></div>`;
 }
 function drinkProgress(d, order) {
   const brewed = !!d?.shots && !d?.brewingUntil && d.shots >= (order?.recipe.shots || 1);
   const finished = brewed && d.milkUnits >= (order?.recipe.milkUnits || 0);
   const current = !d ? 0 : !brewed ? 1 : !finished ? 2 : 3;
-  const steps = [["Grind", '<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="11" ry="16" transform="rotate(30 20 20)"/><path d="M26 6C28 19 12 22 14 34"/></svg>'], ["Brew", ingredientIcons.shot], ["Milk", '<svg viewBox="0 0 40 40"><path d="M9 7Q18 4 28 7L26 12Q29 27 26 33Q18 37 10 33L11 13ZM28 12C39 9 38 25 28 27"/></svg>'], ["Serve", ingredientIcons.shot]];
+  const steps = [["Cup", cupGraphic(d?.cup || order?.recipe.cup)], ["Brew", ingredientIcons.shot], ["Milk", '<svg viewBox="0 0 40 40"><path d="M9 7Q18 4 28 7L26 12Q29 27 26 33Q18 37 10 33L11 13ZM28 12C39 9 38 25 28 27"/></svg>'], ["Serve", cupGraphic(d?.cup || order?.recipe.cup)]];
   return `<ol class="drink-progress" aria-label="Drink progress">${steps.map(([label, image], i) => `<li class="${i < current ? "complete" : i === current ? "current" : "pending"}" ${i === current ? 'aria-current="step"' : ""}><span class="step-icon">${image}</span><b>${label}</b></li>`).join("")}</ol>`;
 }
 function machineTool(label, cls, type, disabled) {
   const image = type === "ice" ? ingredientIcons.ice : '<svg viewBox="0 0 40 40"><path d="M10 12H30L28 34Q20 37 12 34ZM7 9H33M16 8V4H24V8M17 16V29M23 16V29"/></svg>';
   return `<button class="object-control machine-tool ${cls}" data-drink="${type}" ${disabled ? "disabled" : ""} aria-label="${label}" title="${label}"><i class="machine-tool-art" aria-hidden="true">${image}</i><span>${label}</span></button>`;
 }
+function centerCup(d) {
+  const patch = '<svg class="empty-cup-patch" viewBox="0 0 295 190" preserveAspectRatio="none" aria-hidden="true"><image href="./assets/workstation-empty.webp" width="295" height="190"/></svg>';
+  if (!d) return patch;
+  const cuts = {
+    hot: [667, 526, 276, 180, "M8 14Q90-8 194 12L202 48Q233 17 262 39Q290 72 264 118Q250 140 203 145Q181 181 100 177Q14 180 6 125Z"],
+    iced: [230, 594, 129, 158, "M4 10Q62-7 126 10L117 142Q68 165 14 145Z"],
+    togo: [365, 562, 145, 192, "M18 17Q70-3 131 18L132 35H142L140 54H130L118 181Q70 200 29 183L17 56H5V39H14Z"],
+  };
+  const [x,y,w,h,path] = cuts[d.cup] || cuts.hot;
+  return patch + `<div class="center-cup-art cup-${d.cup}">${art("workstation", x,y,w,h,"",path)}</div>`;
+}
 function drinkSurface(d) {
   if (!d || (!d.shots && !d.milkUnits && !d.ice && !d.brewingUntil)) return "";
-  return `<div class="drink-overlay ${d.cup === "iced" ? "iced" : ""} ${d.brewingUntil ? "pouring" : ""}" aria-hidden="true"><div class="clay-liquid ${d.milkUnits ? "milky" : "espresso"}"><span class="crema"></span>${d.pumps ? '<span class="syrup-swirl"></span>' : ""}</div>${d.ice ? '<div class="clay-ice"><i></i><i></i><i></i></div>' : ""}</div>`;
+  return `<div class="drink-overlay cup-${d.cup} ${d.cup === "iced" ? "iced" : ""} ${d.brewingUntil ? "pouring" : ""}" aria-hidden="true"><div class="clay-liquid ${d.milkUnits ? "milky" : "espresso"}"><span class="crema"></span>${d.pumps ? '<span class="syrup-swirl"></span>' : ""}</div>${d.ice ? '<div class="clay-ice"><i></i><i></i><i></i></div>' : ""}</div>`;
 }
 const outlines = {
   "hot-cup":
@@ -219,12 +236,10 @@ function playing() {
   if (!o) selected = null;
   const d = o?.drink;
   const locked = !o?.mine;
-  const elapsed = state.now - state.starts;
-  const mood = elapsed < 100000 ? "day" : elapsed < 200000 ? "sunset" : "night";
   const time = Math.max(0, Math.ceil((state.ends - state.now) / 1000));
   shell(
-    "playing " + mood,
-    `<div class="order-rail">${c.orders.map(ticket).join("")}</div><aside class="glass live-board" aria-label="Live tip leaderboard"><h2>Live tips</h2>${state.leaders.map((l, i) => `<div class="live-row ${l.mine ? "mine" : ""}"><span>${i + 1}</span>${mugArt(mugIdentity(l.name))}<b>${esc(l.name)}</b><strong>${money(l.tips)}</strong></div>`).join("")}</aside><section class="physical-station" aria-label="Drink preparation">${hotspot("Hot cup", "hot-cup " + (d?.cup === "hot" ? "active" : ""), "cup", 'data-cup="hot"', locked || !!d)}${hotspot("Cold cup", "cold-cup " + (d?.cup === "iced" ? "active" : ""), "cup", 'data-cup="iced"', locked || !!d)}${hotspot("To go · cold cup", "takeaway", "cup", 'data-cup="iced"', locked || !!d)}${hotspot(d?.brewingUntil ? "Brewing…" : `Brew shot · ${d?.shots || 0}/2`, "brew-switch " + (d?.brewingUntil ? "brewing" : ""), "brew", "", locked || !d || !!d.brewingUntil || d.shots >= 2)}${machineTool("Add ice", "ice-switch", "ice", locked || !d || d.cup !== "iced" || d.ice)}${machineTool("Clear cup", "clear-switch", "reset", locked || !d)}${hotspot(`Whole milk · ${d?.milk === "whole" ? d.milkUnits : 0}/2`, "whole-pitcher", "milk", 'data-milk="whole"', locked || !d || d.milkUnits >= 2)}${hotspot(`Oat milk · ${d?.milk === "oat" ? d.milkUnits : 0}/2`, "oat-pitcher", "milk", 'data-milk="oat"', locked || !d || d.milkUnits >= 2)}${hotspot("Vanilla pump", "vanilla-pump", "syrup", 'data-syrup="vanilla"', locked || !d || d.pumps >= 2)}${hotspot("Caramel pump", "caramel-pump", "syrup", 'data-syrup="caramel"', locked || !d || d.pumps >= 2)}${hotspot("Serve drink", "serve-bell", "serve", "", locked || !d?.shots || !!d?.brewingUntil)}<div class="cup-labels">${art("reference-gameplay", 25, 740, 510, 72)}</div>${drinkSurface(d)}<div class="jar-label"><span>Tips</span><strong>${money(c.tips)}</strong></div></section>${state.mode === "teams" ? `<button class="handoff-tool" data-drink="handoff" ${locked ? "disabled" : ""}>Pass to teammate</button>` : ""}${d?.pumps ? `<div class="syrup-confirmation" role="status">${ingredient(d.syrup)}${d.pumps} ${esc(d.syrup)} pump${d.pumps === 1 ? "" : "s"} added ✓</div>` : ""}${drinkProgress(d, o)}`,
+    "playing" + (time <= 10 ? " urgent" : ""),
+    `<div class="order-rail">${c.orders.map(ticket).join("")}</div><aside class="glass live-board" aria-label="Live tip leaderboard"><h2>Live tips</h2>${state.leaders.map((l, i) => `<div class="live-row ${l.mine ? "mine" : ""}"><span>${i + 1}</span>${mugArt(mugIdentity(l.name))}<b>${esc(l.name)}</b><strong>${money(l.tips)}</strong></div>`).join("")}</aside><section class="physical-station" aria-label="Drink preparation">${hotspot("Hot cup", "hot-cup " + (d?.cup === "hot" ? "active" : ""), "cup", 'data-cup="hot"', locked || !!d)}${hotspot("Cold cup", "cold-cup " + (d?.cup === "iced" ? "active" : ""), "cup", 'data-cup="iced"', locked || !!d)}${hotspot("To go cup", "takeaway " + (d?.cup === "togo" ? "active" : ""), "cup", 'data-cup="togo"', locked || !!d)}${hotspot(d?.brewingUntil ? "Brewing…" : `Brew shot · ${d?.shots || 0}/2`, "brew-switch " + (d?.brewingUntil ? "brewing" : ""), "brew", "", locked || !d || !!d.brewingUntil || d.shots >= 2)}${machineTool("Add ice", "ice-switch", "ice", locked || !d || d.cup !== "iced" || d.ice)}${machineTool("Clear cup", "clear-switch", "reset", locked || !d)}${hotspot(`Whole milk · ${d?.milk === "whole" ? d.milkUnits : 0}/2`, "whole-pitcher", "milk", 'data-milk="whole"', locked || !d || d.milkUnits >= 2)}${hotspot(`Oat milk · ${d?.milk === "oat" ? d.milkUnits : 0}/2`, "oat-pitcher", "milk", 'data-milk="oat"', locked || !d || d.milkUnits >= 2)}${hotspot(`Vanilla pump · ${d?.syrup === "vanilla" ? d.pumps : 0}/2`, "vanilla-pump", "syrup", 'data-syrup="vanilla"', locked || !d || d.pumps >= 2)}${hotspot(`Caramel pump · ${d?.syrup === "caramel" ? d.pumps : 0}/2`, "caramel-pump", "syrup", 'data-syrup="caramel"', locked || !d || d.pumps >= 2)}${hotspot("Serve drink", "serve-bell", "serve", "", locked || !d?.shots || !!d?.brewingUntil)}<div class="cup-labels">${art("reference-gameplay", 25, 740, 510, 72)}</div>${centerCup(d)}${drinkSurface(d)}<div class="jar-label"><span>Tips</span><strong>${money(c.tips)}</strong></div></section>${state.mode === "teams" ? `<button class="handoff-tool" data-drink="handoff" ${locked ? "disabled" : ""}>Pass to teammate</button>` : ""}${drinkProgress(d, o)}`,
     `${Math.floor(time / 60)}:${String(time % 60).padStart(2, "0")}`,
   );
 }
@@ -403,10 +418,6 @@ app.addEventListener("click", async (e) => {
       selected = null;
       station = "brew";
       chime();
-    }
-    if (type === "syrup" && state?.cafe) {
-      const drink = state.cafe.orders.find(o => o.id === selected)?.drink;
-      if (drink?.pumps) toast(`${drink.syrup === "vanilla" ? "Vanilla" : "Caramel"} added · ${drink.pumps} pump${drink.pumps === 1 ? "" : "s"}`);
     }
     render();
   }
