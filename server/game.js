@@ -8,7 +8,11 @@ export const RECIPES = [
   { name: 'Oat cappuccino', cup: 'hot', shots: 2, milk: 'oat', milkUnits: 1, syrup: 'none', pumps: 0, ice: false },
   { name: 'Iced vanilla latte', cup: 'iced', shots: 1, milk: 'whole', milkUnits: 2, syrup: 'vanilla', pumps: 2, ice: true },
   { name: 'Americano', cup: 'hot', shots: 2, milk: 'none', milkUnits: 0, syrup: 'none', pumps: 0, ice: false },
+  { name: 'Vanilla latte to go', cup: 'togo', shots: 1, milk: 'whole', milkUnits: 2, syrup: 'vanilla', pumps: 1, ice: false },
+  { name: 'Oat cappuccino to go', cup: 'togo', shots: 2, milk: 'oat', milkUnits: 1, syrup: 'none', pumps: 0, ice: false },
+  { name: 'Americano to go', cup: 'togo', shots: 2, milk: 'none', milkUnits: 0, syrup: 'none', pumps: 0, ice: false },
 ];
+export const CUP_TYPES = ['hot', 'iced', 'togo'];
 const CUSTOMERS = ['Maya', 'Theo', 'Alex', 'Sam', 'Jun', 'Riley', 'Noor', 'Jamie'];
 const fail = message => { throw Object.assign(new Error(message), { status: 400 }); };
 const token = () => randomBytes(24).toString('hex');
@@ -33,8 +37,8 @@ export class Game {
   touch(r) { r.updated = this.now(); r.version++; }
   cafe(r, p) { return r.cafes.find(c=>c.id===(r.mode==='teams'?p.team:p.id)); }
   order(r,c) {
-    const index=c.next++, cup=['hot','iced','togo'][(r.seed+index)%3];
-    const choices=RECIPES.filter(recipe=>recipe.cup===(cup==='iced'?'iced':'hot'));
+    const index=c.next++, cup=CUP_TYPES[(r.seed+index)%CUP_TYPES.length];
+    const choices=RECIPES.filter(recipe=>recipe.cup===cup);
     const recipe={...choices[(r.seed+Math.floor(index/3))%choices.length],cup};
     return { id: `${c.id}:${index}`, index, customer: CUSTOMERS[(r.seed+index)%CUSTOMERS.length], recipe, created:this.now(), expires:this.now()+90000, drink:null, owner:null, lease:0 };
   }
@@ -81,7 +85,7 @@ export class Game {
       else {
         if(o.owner!==id)fail('Claim this order before preparing it.');o.lease=this.now();
         if(a.type==='handoff') { o.owner=null; }
-        else if(a.type==='cup') { if(!['hot','iced','togo'].includes(a.cup))fail('Choose a cup.'); if(o.drink)fail('Clear the cup before choosing another.');o.drink={cup:a.cup,shots:0,milk:'none',milkUnits:0,syrup:'none',pumps:0,ice:false,brewingUntil:0}; }
+        else if(a.type==='cup') { if(!CUP_TYPES.includes(a.cup))fail('Choose a cup.'); if(o.drink)fail('Clear the cup before choosing another.');o.drink={cup:a.cup,shots:0,milk:'none',milkUnits:0,syrup:'none',pumps:0,ice:false,brewingUntil:0}; }
         else if(a.type==='reset') { o.drink=null; }
         else {
           const d=o.drink;if(!d)fail('Choose a cup first.');

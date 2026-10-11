@@ -172,6 +172,7 @@ const ingredientIcons = {
   cold: '<svg viewBox="0 0 40 40"><path fill="#e8c495" d="M11 16h20l-4 22H14Z"/><path d="m11 12 3 26h13l4-26M8 12q14-7 26 0M23 1l-4 25M8 12q14 8 26 0"/></svg>',
   none: '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14"/><path d="m10 10 20 20"/></svg>',
 };
+ingredientIcons.togo = '<svg viewBox="0 0 40 40"><path fill="#e8c495" d="M10 13H30L27 36H13Z"/><path d="M10 8L12 3H28L30 8M7 8H33V13H7ZM10 13L13 36H27L30 13M12 23H28"/></svg>';
 function ingredient(name) {
   return `<i class="recipe-icon">${ingredientIcons[name]}</i>`;
 }
@@ -182,11 +183,11 @@ function cupGraphic(cup) {
   return ingredientIcons.shot;
 }
 function recipeRows(r) {
-  return `<span>${ingredient("shot")}${r.shots} shot${r.shots === 1 ? "" : "s"}</span><span>${ingredient(r.milk === "oat" ? "oat" : r.milk === "none" ? "none" : "milk")}${r.milk === "none" ? "No milk" : r.milkUnits + " " + (r.milk === "whole" ? "milk" : "oat")}</span><span>${ingredient(r.syrup === "none" ? "none" : r.syrup)}${r.syrup === "none" ? "No syrup" : r.pumps + " " + r.syrup}</span>${r.ice ? `<span>${ingredient("ice")}Ice</span>` : ""}<span>${ingredient(r.cup === "iced" ? "cold" : "shot")}${r.cup === "iced" ? "Cold" : "Hot"}${r.cup === "iced" && !r.ice ? " · no ice" : ""}</span>`;
+  return `<span class="order-cup">${ingredient(r.cup === "hot" ? "shot" : r.cup === "togo" ? "togo" : "cold")}${cupLabel(r.cup)}${r.cup === "iced" && !r.ice ? " · no ice" : ""}</span><span>${ingredient("shot")}${r.shots} shot${r.shots === 1 ? "" : "s"}</span><span>${ingredient(r.milk === "oat" ? "oat" : r.milk === "none" ? "none" : "milk")}${r.milk === "none" ? "No milk" : r.milkUnits + " " + (r.milk === "whole" ? "milk" : "oat")}</span><span>${ingredient(r.syrup === "none" ? "none" : r.syrup)}${r.syrup === "none" ? "No syrup" : r.pumps + " " + r.syrup}</span>${r.ice ? `<span>${ingredient("ice")}Ice</span>` : ""}`;
 }
 function ticket(o) {
   const patience = Math.max(0, (o.expires - state.now) / 90000);
-  return `<div class="ticket-wrap"><span class="brass-clip" aria-hidden="true"></span><button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}" aria-label="${esc(o.recipe.name)}, ${o.mine ? "your order" : o.claimedBy ? "claimed by " + esc(o.claimedBy) : "claim order"}"><div class="ticket-cup">${cupGraphic(o.recipe.cup)}${cupLabel(o.recipe.cup)}</div><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim"}</small></button></div>`;
+  return `<div class="ticket-wrap"><span class="brass-clip" aria-hidden="true"></span><button class="paper-ticket ${selected === o.id ? "selected" : ""}" data-order="${esc(o.id)}" aria-pressed="${selected === o.id}" aria-label="${esc(o.recipe.name)}, ${o.mine ? "your order" : o.claimedBy ? "claimed by " + esc(o.claimedBy) : "claim order"}"><h3>${esc(o.recipe.name)}</h3><div class="recipe-rows">${recipeRows(o.recipe)}</div><div class="patience"><i style="width:${patience * 100}%"></i></div><small>${Math.ceil(patience * 90)}s · ${o.mine ? "Yours" : o.claimedBy ? esc(o.claimedBy) : "Claim"}</small></button></div>`;
 }
 function drinkProgress(d, order) {
   const brewed = !!d?.shots && !d?.brewingUntil && d.shots >= (order?.recipe.shots || 1);

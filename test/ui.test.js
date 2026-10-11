@@ -233,7 +233,9 @@ test("cup labels and progress reflect all three cup types and lighting only warn
     ui.context.orderId = order.id;
     vm.runInContext("selected=orderId", ui.context);
     const html = ui.show(snapshot);
-    assert.match(html, /ticket-cup/);
+    assert.match(html, /order-cup/);
+    assert.ok(!html.includes("ticket-cup"));
+    assert.match(html, /<h3>[^<]+<\/h3><div class="recipe-rows"><span class="order-cup">/);
     assert.match(html, />Cup<\/b>/);
     assert.ok(!html.includes(">Grind<"));
     assert.ok(html.includes(cup === "hot" ? "Hot" : cup === "iced" ? "Cold" : "To go"));

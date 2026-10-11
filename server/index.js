@@ -26,7 +26,7 @@ export function createServer(game=new Game()) {
       const filename=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname).slice(1);
       const target=path.resolve(publicDir,filename);if(!target.startsWith(publicDir+path.sep))return json(403,{error:'Forbidden.'});
       const bytes=await readFile(target);const type={'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ttf':'font/ttf'}[path.extname(target)]||'application/octet-stream';
-      res.writeHead(200,{'Content-Type':type,'X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','Content-Security-Policy':"default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; script-src 'self'"});res.end(req.method==='HEAD'?undefined:bytes);
+      res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','Content-Security-Policy':"default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; script-src 'self'"});res.end(req.method==='HEAD'?undefined:bytes);
     } catch(e){json(e.status|| (e.code==='ENOENT'?404:500),{error:e.status?e.message:e.code==='ENOENT'?'Not found.':'Something went wrong. Try again.'});}
   });
 }

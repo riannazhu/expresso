@@ -27,3 +27,27 @@ test('orders evenly rotate three distinct cups and score to-go drinks correctly'
   const result=makeDrink(g,host,amount=>now+=amount);
   assert.equal(result.cafe.history[0].accuracy,100);
 });
+
+test('HTTP cup selection accepts hot, cold and to-go as distinct machine cups', async () => {
+  const server=createServer();
+  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+  try {
+    const base='http://127.0.0.1:'+server.address().port;
+    const post=async(path,data,token)=>{
+      const response=await fetch(base+'/api/'+path,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(data)});
+      assert.equal(response.status,200);
+      return response.json();
+    };
+    const host=await post('create',{name:'Cup QA',practice:true});
+    const action=a=>post('action',{code:host.code,action:a},host.token);
+    await action({type:'ready',ready:true});
+    const playing=await action({type:'start'});
+    const orderId=playing.cafe.orders[0].id;
+    await action({type:'claim',orderId});
+    for(const cup of ['hot','iced','togo']) {
+      const state=await action({type:'cup',orderId,cup});
+      assert.equal(state.cafe.orders[0].drink.cup,cup);
+      await action({type:'reset',orderId});
+    }
+  } finally { await new Promise(resolve=>server.close(resolve)); }
+});
